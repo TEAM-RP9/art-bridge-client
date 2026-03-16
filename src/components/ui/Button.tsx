@@ -1,3 +1,5 @@
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +40,7 @@ const buttonVariants = cva(
         sm: "h-8 px-3 text-xs",
         md: "h-10 px-4 text-sm",
         lg: "h-12 px-6 text-base",
-        /** Square icon-only button — combine with an icon child */
+        /** Square icon-only button — pair with a single icon child */
         icon: "h-10 w-10",
       },
     },
@@ -61,33 +63,57 @@ export type ButtonSize = NonNullable<
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /**
+   * When true, renders the button's child element as the root node
+   * (via Radix Slot), allowing e.g. a Next.js <Link> to receive
+   * all button styles without a wrapping <button> in the DOM.
+   */
+  asChild?: boolean;
   /** Renders a spinner and disables interaction while true */
   isLoading?: boolean;
+  /** Icon rendered to the left of the label */
+  leftIcon?: React.ReactNode;
+  /** Icon rendered to the right of the label */
+  rightIcon?: React.ReactNode;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function Button({
-  className,
-  variant,
-  size,
-  isLoading = false,
-  disabled,
-  children,
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      className={cn(buttonVariants({ variant, size }), className)}
-      disabled={disabled ?? isLoading}
-      aria-busy={isLoading || undefined}
-      {...props}
-    >
-      {isLoading && <Spinner />}
-      {children}
-    </button>
-  );
-}
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading = false,
+      disabled,
+      leftIcon,
+      rightIcon,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : "button";
+
+    return (
+      <Comp
+        ref={ref}
+        className={cn(buttonVariants({ variant, size }), className)}
+        disabled={disabled ?? isLoading}
+        aria-busy={isLoading || undefined}
+        {...props}
+      >
+        {isLoading ? <Spinner /> : leftIcon}
+        {children}
+        {!isLoading && rightIcon}
+      </Comp>
+    );
+  }
+);
+
+Button.displayName = "Button";
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
@@ -119,4 +145,4 @@ function Spinner() {
 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
-export { buttonVariants };
+export { Button, buttonVariants };
