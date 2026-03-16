@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ArtBridge — Frontend Client
+
+Next.js 16 · React 19 · Tailwind CSS v4 · TypeScript
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Folder Structure
 
-## Learn More
+```
+src/
+├── app/                        # Next.js App Router pages and layouts
+│   ├── globals.css             # Global styles and Tailwind v4 design tokens (@theme)
+│   ├── layout.tsx              # Root layout
+│   └── page.tsx                # Home page
+│
+├── components/
+│   ├── ui/                     # Design system atoms (DS-3 through DS-7)
+│   │   └── index.ts            # Barrel export — import from "@/components/ui"
+│   │
+│   └── common/                 # Composed/shared molecules (DS-8+)
+│       └── index.ts            # Barrel export — import from "@/components/common"
+│
+└── lib/
+    └── utils.ts                # Shared utilities (cn() helper)
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Import Conventions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All TypeScript path aliases are rooted at `src/` via `@/*`:
 
-## Deploy on Vercel
+```ts
+// Utilities
+import { cn } from "@/lib/utils";
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+// UI atom components
+import { Button, Badge } from "@/components/ui";
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+// Composed/common components
+import { PageHeader, EmptyState } from "@/components/common";
+```
+
+> **Rule:** Never import a component by its full path (`../../components/ui/Button`).
+> Always use the barrel alias. This keeps refactoring safe and imports readable.
+
+---
+
+## cn() — Class Name Helper
+
+`cn()` lives in `@/lib/utils` and combines `clsx` with `tailwind-merge`.
+Use it everywhere instead of raw string concatenation:
+
+```ts
+import { cn } from "@/lib/utils";
+
+// Resolves Tailwind conflicts (e.g. p-2 + p-4 → p-4) and handles conditionals
+className={cn("base-class", isActive && "bg-primary", className)}
+```
+
+---
+
+## Design Tokens
+
+Design tokens are defined as CSS custom properties in `src/app/globals.css` inside the
+`@theme` block (Tailwind v4 convention — no `tailwind.config.ts` needed):
+
+```css
+@theme {
+  --color-primary: var(--primary);
+  /* ... */
+}
+```
+
+See DS-2 (ARTBR-26) for the full token audit and dark mode setup.
+
