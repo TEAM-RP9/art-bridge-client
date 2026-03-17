@@ -25,5 +25,8 @@ export type { LabelProps } from "./Label";
 export { Paragraph } from "./Paragraph";
 export type { ParagraphProps } from "./Paragraph";
 
+export { Switch, switchThumbVariants, switchTrackVariants } from "./Switch";
+export type { SwitchProps } from "./Switch";
+
 export { Textarea, textareaVariants } from "./Textarea";
 export type { TextareaProps } from "./Textarea";
