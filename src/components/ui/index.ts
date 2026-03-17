@@ -13,6 +13,9 @@ export type { ButtonProps, ButtonSize, ButtonVariant } from "./Button";
 export { Code, Pre } from "./Code";
 export type { CodeProps } from "./Code";
 
+export { FormField } from "./FormField";
+export type { FormFieldProps } from "./FormField";
+
 export { Heading } from "./Heading";
 export type { HeadingProps } from "./Heading";
 
