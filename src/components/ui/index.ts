@@ -16,6 +16,9 @@ export type { CodeProps } from "./Code";
 export { Heading } from "./Heading";
 export type { HeadingProps } from "./Heading";
 
+export { Input, inputVariants } from "./Input";
+export type { InputProps } from "./Input";
+
 export { Label } from "./Label";
 export type { LabelProps } from "./Label";
 
