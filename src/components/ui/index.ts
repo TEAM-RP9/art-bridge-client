@@ -24,3 +24,6 @@ export type { LabelProps } from "./Label";
 
 export { Paragraph } from "./Paragraph";
 export type { ParagraphProps } from "./Paragraph";
+
+export { Textarea, textareaVariants } from "./Textarea";
+export type { TextareaProps } from "./Textarea";
