@@ -1,9 +1,12 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils";
 
 const tagChipVariants = cva(
-  "inline-flex items-center gap-1 rounded-full border border-input bg-background text-foreground",
+  [
+    "inline-flex items-center gap-1 rounded-full border border-input bg-background",
+    "text-foreground transition-colors",
+  ],
   {
     variants: {
       size: {
@@ -17,16 +20,25 @@ const tagChipVariants = cva(
   }
 );
 
-export type TagChipProps =
-  Omit<React.HTMLAttributes<HTMLDivElement>, "onRemove"> &
-    VariantProps<typeof tagChipVariants> & {
-      onRemove?: () => void;
-      removeLabel?: string;
-    };
+export interface TagChipProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onRemove">,
+    VariantProps<typeof tagChipVariants> {
+  /** Optional remove callback; when provided, a remove button is rendered. */
+  onRemove?: () => void;
+  /** Accessible label for remove button. */
+  removeLabel?: string;
+}
 
 export const TagChip = React.forwardRef<HTMLDivElement, TagChipProps>(
   (
-    { className, size, onRemove, removeLabel = "Remove tag", children, ...props },
+    {
+      className,
+      size,
+      onRemove,
+      removeLabel = "Remove tag",
+      children,
+      ...props
+    },
     ref
   ) => (
     <div
