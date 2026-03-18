@@ -1,4 +1,4 @@
-import { Badge, Paragraph, TagChip } from "../../../components/ui";
+import { Badge, Paragraph, TagChip } from "@/components/ui";
 
 type Ds6BadgeTagChipSectionsProps = {
   selectedTags: string[];
