@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 
 const progressToneVariants = cva("h-2 w-full overflow-hidden rounded-full bg-secondary", {
