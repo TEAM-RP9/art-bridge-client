@@ -8,4 +8,16 @@
 
 // Keep entries alphabetically sorted.
 export { Button, buttonVariants } from "./Button";
-export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
+export type { ButtonProps, ButtonSize, ButtonVariant } from "./Button";
+
+export { Code, Pre } from "./Code";
+export type { CodeProps } from "./Code";
+
+export { Heading } from "./Heading";
+export type { HeadingProps } from "./Heading";
+
+export { Label } from "./Label";
+export type { LabelProps } from "./Label";
+
+export { Paragraph } from "./Paragraph";
+export type { ParagraphProps } from "./Paragraph";
