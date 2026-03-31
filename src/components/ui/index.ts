@@ -6,5 +6,6 @@
  *   import { Button, Badge } from "@/components/ui";
  */
 
-// Components will be added here as they are built in DS-3 through DS-8.
 // Keep entries alphabetically sorted.
+export { Button, buttonVariants } from "./Button";
+export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
