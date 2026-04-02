@@ -37,9 +37,10 @@ export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement> &
  * <Label htmlFor="disabled-field" disabled>Disabled Field</Label>
  */
 export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
-  ({ required, disabled, className, ...props }, ref) => (
+  ({ required, disabled, className, htmlFor, ...props }, ref) => (
     <label
       ref={ref}
+      htmlFor={htmlFor}
       className={cn(labelVariants({ required, disabled }), className)}
       {...props}
     />
