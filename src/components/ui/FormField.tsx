@@ -51,7 +51,12 @@ export function FormField({
   return (
     <div className={cn("space-y-2", className)} {...props}>
       {(label || actionSlot) && (
-        <div className="flex items-start justify-between gap-3">
+        <div
+          className={cn(
+            "flex items-start gap-3",
+            label && actionSlot ? "justify-between" : "justify-start"
+          )}
+        >
           {label ? (
             <Label
               htmlFor={htmlFor}
@@ -60,9 +65,7 @@ export function FormField({
             >
               {label}
             </Label>
-          ) : (
-            <span />
-          )}
+          ) : null}
           {actionSlot}
         </div>
       )}

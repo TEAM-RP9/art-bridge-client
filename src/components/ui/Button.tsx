@@ -68,6 +68,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       asChild = false,
       isLoading = false,
       disabled,
+      onClickCapture,
       leftIcon,
       rightIcon,
       children,
@@ -76,13 +77,28 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
+    const isDisabled = Boolean(disabled ?? isLoading);
 
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, size }), className)}
-        disabled={disabled ?? isLoading}
+        className={cn(
+          buttonVariants({ variant, size }),
+          asChild && isDisabled && "pointer-events-none opacity-50",
+          className
+        )}
+        disabled={!asChild ? isDisabled : undefined}
+        aria-disabled={asChild && isDisabled ? true : undefined}
+        data-disabled={asChild && isDisabled ? "" : undefined}
         aria-busy={isLoading || undefined}
+        onClickCapture={(event) => {
+          if (asChild && isDisabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          onClickCapture?.(event as React.MouseEvent<HTMLButtonElement>);
+        }}
         {...props}
       >
         {isLoading ? <Spinner /> : leftIcon}
