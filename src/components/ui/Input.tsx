@@ -34,13 +34,6 @@ export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof inputVariants> {}
 
-/**
- * Input field for text-like values.
- *
- * @example
- * <Input placeholder="Your email" />
- * <Input state="error" aria-invalid />
- */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, size, state, type = "text", ...props }, ref) => (
     <input

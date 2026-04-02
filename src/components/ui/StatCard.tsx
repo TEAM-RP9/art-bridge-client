@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 
 const trendVariants = cva("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", {

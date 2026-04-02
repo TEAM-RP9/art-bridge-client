@@ -7,6 +7,7 @@ import {
   Ds4TypographySections,
   Ds5FormControlSections,
   Ds6BadgeTagChipSections,
+  Ds7CardSections,
   StyleGuideQuickNav,
   StyleGuideHeader,
 } from "./sections";
@@ -53,6 +54,7 @@ export default function StyleGuidePage() {
         selectedTags={selectedTags}
         onRemoveTag={removeTag}
       />
+      <Ds7CardSections />
     </main>
   );
 }

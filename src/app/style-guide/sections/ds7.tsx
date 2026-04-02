@@ -10,7 +10,7 @@ import {
   ProgressCardSkeleton,
   StatCard,
   StatCardSkeleton,
-} from "../../../components/ui";
+} from "@/components/ui";
 
 export function Ds7CardSections() {
   return (

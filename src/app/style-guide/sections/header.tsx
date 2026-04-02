@@ -12,7 +12,7 @@ export function StyleGuideHeader({
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Style Guide</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          DS-2 tokens · DS-3 Button · DS-4 Typography · DS-5 Form controls.
+          DS-2 tokens · DS-3 Button · DS-4 Typography · DS-5 Form controls · DS-6 Chips · DS-7 Cards.
         </p>
       </div>
 

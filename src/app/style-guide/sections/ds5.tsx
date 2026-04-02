@@ -1,4 +1,4 @@
-import { FormField, Input, Paragraph, Switch, Textarea } from "../../../components/ui";
+import { FormField, Input, Paragraph, Switch, Textarea } from "@/components/ui";
 
 type Ds5FormControlSectionsProps = {
   notificationsEnabled: boolean;

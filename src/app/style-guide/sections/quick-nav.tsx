@@ -4,6 +4,7 @@ const navItems = [
   { id: "ds4", label: "DS-4 Typography" },
   { id: "ds5", label: "DS-5 Forms" },
   { id: "ds6", label: "DS-6 Badge & TagChip" },
+  { id: "ds7", label: "DS-7 Cards" },
 ];
 
 export function StyleGuideQuickNav() {
