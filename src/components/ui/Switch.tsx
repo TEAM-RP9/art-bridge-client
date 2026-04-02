@@ -55,7 +55,7 @@ export interface SwitchProps
     VariantProps<typeof switchTrackVariants> {}
 
 export const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitive.Root>,
+  React.ComponentRef<typeof SwitchPrimitive.Root>,
   SwitchProps
 >(({ className, state, size, ...props }, ref) => (
   <SwitchPrimitive.Root

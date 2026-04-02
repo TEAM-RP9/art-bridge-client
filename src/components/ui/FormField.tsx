@@ -36,8 +36,28 @@ export function FormField({
   labelProps,
   children,
   ...props
-}: FormFieldProps) {
+}: Readonly<FormFieldProps>) {
   const hasError = Boolean(error);
+  let message: React.ReactNode = null;
+
+  if (hasError) {
+    message = (
+      <Paragraph
+        size="sm"
+        color="default"
+        className="text-destructive"
+        role="alert"
+      >
+        {error}
+      </Paragraph>
+    );
+  } else if (description) {
+    message = (
+      <Paragraph size="sm" color="muted">
+        {description}
+      </Paragraph>
+    );
+  }
 
   return (
     <div className={cn("space-y-2", className)} {...props}>
@@ -60,20 +80,7 @@ export function FormField({
 
       {children}
 
-      {hasError ? (
-        <Paragraph
-          size="sm"
-          color="default"
-          className="text-destructive"
-          role="alert"
-        >
-          {error}
-        </Paragraph>
-      ) : description ? (
-        <Paragraph size="sm" color="muted">
-          {description}
-        </Paragraph>
-      ) : null}
+      {message}
     </div>
   );
 }

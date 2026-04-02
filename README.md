@@ -46,7 +46,7 @@ All TypeScript path aliases are rooted at `src/` via `@/*`:
 import { cn } from "@/lib/utils";
 
 // UI atom components
-import { Button, Badge } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 // Composed/common components
 import { PageHeader, EmptyState } from "@/components/common";

@@ -194,25 +194,25 @@ export default function StyleGuidePage() {
         <h2 className="text-lg font-semibold text-card-foreground">Paragraph — sizes & variants</h2>
         <div className="mt-4 space-y-4">
           <div>
-            <Label htmlFor="para-lg">Large (base text):</Label>
+            <Paragraph size="sm" color="muted" weight="medium">{"Large (base text):"}</Paragraph>
             <Paragraph size="lg" className="mt-2">
               This is a large paragraph with comfortable reading line-height. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
             </Paragraph>
           </div>
           <div>
-            <Label htmlFor="para-base">Base (default):</Label>
+            <Paragraph size="sm" color="muted" weight="medium">{"Base (default):"}</Paragraph>
             <Paragraph size="base" className="mt-2">
               This is base paragraph text, the standard size for body content across the design system.
             </Paragraph>
           </div>
           <div>
-            <Label htmlFor="para-sm">Small:</Label>
+            <Paragraph size="sm" color="muted" weight="medium">{"Small:"}</Paragraph>
             <Paragraph size="sm" className="mt-2">
               Small paragraph text ideal for secondary information or captions.
             </Paragraph>
           </div>
           <div>
-            <Label htmlFor="para-xs">Extra small:</Label>
+            <Paragraph size="sm" color="muted" weight="medium">{"Extra small:"}</Paragraph>
             <Paragraph size="xs" className="mt-2">
               Extra small text for minor details or disclaimers.
             </Paragraph>
@@ -254,7 +254,7 @@ export default function StyleGuidePage() {
         <div className="mt-4 space-y-4">
           <div>
             <Paragraph className="mb-2">Inline code example:</Paragraph>
-            <Paragraph>Use <Code>const name = "ArtBridge";</Code> to define a variable.</Paragraph>
+            <Paragraph>Use <Code>const name = &quot;ArtBridge&quot;;</Code> to define a variable.</Paragraph>
           </div>
           <div>
             <Paragraph className="mb-2">Block code example:</Paragraph>

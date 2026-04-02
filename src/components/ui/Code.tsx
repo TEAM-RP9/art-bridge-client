@@ -30,12 +30,23 @@ export type CodeProps = React.HTMLAttributes<HTMLElement> &
  * <Code>const x = 42;</Code>
  * <Code variant="block">{`function example() {\n  return true;\n}`}</Code>
  */
-export const Code = React.forwardRef<HTMLElement, CodeProps>(
-  ({ variant = "inline", className, ...props }, ref) => {
-    const Tag = variant === "block" ? "pre" : "code";
+export const Code = React.forwardRef<HTMLPreElement | HTMLElement, CodeProps>(
+  ({ variant = "inline", className, children, ...props }, ref) => {
+    if (variant === "block") {
+      return (
+        <pre
+          ref={ref as React.Ref<HTMLPreElement>}
+          className={cn(codeVariants({ variant }), className)}
+          {...props}
+        >
+          <code>{children}</code>
+        </pre>
+      );
+    }
+
     return (
-      <Tag
-        ref={ref as any}
+      <code
+        ref={ref as React.Ref<HTMLElement>}
         className={cn(codeVariants({ variant }), className)}
         {...props}
       />
