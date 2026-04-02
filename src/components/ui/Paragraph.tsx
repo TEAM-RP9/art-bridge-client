@@ -30,16 +30,6 @@ const paragraphVariants = cva("", {
 
 export type ParagraphProps = React.HTMLAttributes<HTMLParagraphElement> &
   VariantProps<typeof paragraphVariants>;
-
-/**
- * Paragraph component for body text content.
- * Supports multiple sizes, colors, and weights.
- *
- * @example
- * <Paragraph>Regular paragraph text</Paragraph>
- * <Paragraph size="sm" color="muted">Small muted text</Paragraph>
- * <Paragraph size="lg" weight="semibold">Large bold text</Paragraph>
- */
 export const Paragraph = React.forwardRef<HTMLParagraphElement, ParagraphProps>(
   ({ size, color, weight, className, ...props }, ref) => (
     <p

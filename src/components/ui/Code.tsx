@@ -16,20 +16,9 @@ const codeVariants = cva("font-mono", {
 
 export type CodeProps = React.HTMLAttributes<HTMLElement> &
   VariantProps<typeof codeVariants> & {
-    /**
-     * Code variant: inline for `code` element, block for `<pre><code>` block.
-     */
     variant?: "inline" | "block";
   };
 
-/**
- * Code component for displaying code snippets (inline or block).
- * Uses monospace font with semantic muted background.
- *
- * @example
- * <Code>const x = 42;</Code>
- * <Code variant="block">{`function example() {\n  return true;\n}`}</Code>
- */
 export const Code = React.forwardRef<HTMLPreElement | HTMLElement, CodeProps>(
   ({ variant = "inline", className, children, ...props }, ref) => {
     if (variant === "block") {
@@ -56,10 +45,6 @@ export const Code = React.forwardRef<HTMLPreElement | HTMLElement, CodeProps>(
 
 Code.displayName = "Code";
 
-/**
- * Pre component wrapper for code blocks (convenience export).
- * Semantically represents preformatted text.
- */
 export const Pre = React.forwardRef<
   HTMLPreElement,
   React.HTMLAttributes<HTMLPreElement>

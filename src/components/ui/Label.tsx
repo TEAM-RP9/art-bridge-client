@@ -21,21 +21,9 @@ const labelVariants = cva("text-sm font-medium leading-none", {
 
 export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement> &
   VariantProps<typeof labelVariants> & {
-    /**
-     * Show asterisk and mark as required.
-     */
     required?: boolean;
   };
 
-/**
- * Label component for form inputs.
- * Includes optional required indicator and disabled state.
- *
- * @example
- * <Label htmlFor="email">Email</Label>
- * <Label htmlFor="password" required>Password</Label>
- * <Label htmlFor="disabled-field" disabled>Disabled Field</Label>
- */
 export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
   ({ required, disabled, className, htmlFor, ...props }, ref) => (
     <label

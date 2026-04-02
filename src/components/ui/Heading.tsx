@@ -26,21 +26,9 @@ const headingVariants = cva("font-bold", {
 
 export type HeadingProps = React.HTMLAttributes<HTMLHeadingElement> &
   VariantProps<typeof headingVariants> & {
-    /**
-     * Semantic heading level (h1-h6).
-     * Determines both HTML tag and text size.
-     */
     level?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   };
 
-/**
- * Heading component for semantic page structure.
- * Renders the appropriate HTML heading tag based on the `level` prop.
- *
- * @example
- * <Heading level="h1">Page Title</Heading>
- * <Heading level="h2" color="muted">Subtitle</Heading>
- */
 export const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ level = "h1", color, className, ...props }, ref) => {
     const Tag = level as React.ElementType;
