@@ -62,7 +62,6 @@ export type { CardSkeletonProps, SkeletonProps } from "./Skeleton";
 
 export { StatCard, statTrendVariants } from "./StatCard";
 export type { StatCardProps } from "./StatCard";
-
 export { TagChip, tagChipVariants } from "./TagChip";
 export type { TagChipProps } from "./TagChip";
 
