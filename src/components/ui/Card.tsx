@@ -32,11 +32,8 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
 
 CardHeader.displayName = "CardHeader";
 
-export type CardTitleProps = Omit<
-  React.HTMLAttributes<HTMLHeadingElement>,
-  "children"
-> & {
-  children: React.ReactNode;
+export type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
+  children?: React.ReactNode;
 };
 
 export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(

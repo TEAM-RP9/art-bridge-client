@@ -9,7 +9,10 @@ const navItems = [
 
 export function StyleGuideQuickNav() {
   return (
-    <nav className="sticky top-3 z-10 rounded-xl border border-border bg-card/90 p-3 backdrop-blur">
+    <nav
+      aria-label="Style guide sections"
+      className="sticky top-3 z-10 rounded-xl border border-border bg-card/90 p-3 backdrop-blur"
+    >
       <ul className="flex flex-wrap items-center gap-2">
         {navItems.map((item) => (
           <li key={item.id}>
