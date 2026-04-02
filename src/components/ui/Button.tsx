@@ -77,7 +77,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
-    const isDisabled = Boolean(disabled ?? isLoading);
+    const isDisabled = Boolean(disabled) || isLoading;
 
     return (
       <Comp
@@ -87,7 +87,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           asChild && isDisabled && "pointer-events-none opacity-50",
           className
         )}
-        disabled={!asChild ? isDisabled : undefined}
+        disabled={asChild ? undefined : isDisabled}
         aria-disabled={asChild && isDisabled ? true : undefined}
         data-disabled={asChild && isDisabled ? "" : undefined}
         aria-busy={isLoading || undefined}
