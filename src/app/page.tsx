@@ -16,10 +16,10 @@ export default function Home() {
         Open Style Guide
       </a>
       <a
-        href="/auth-test"
-        className="inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 mt-2"
+        href="/test"
+        className="inline-flex items-center rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-900 mt-2"
       >
-        Open Auth Test Page
+        Developer Test Pages
       </a>
     </main>
   );
