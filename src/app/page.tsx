@@ -11,9 +11,15 @@ export default function Home() {
       </p>
       <a
         href="/style-guide"
-        className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-accent hover:text-accent-foreground mb-2"
       >
         Open Style Guide
+      </a>
+      <a
+        href="/auth-test"
+        className="inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 mt-2"
+      >
+        Open Auth Test Page
       </a>
     </main>
   );
