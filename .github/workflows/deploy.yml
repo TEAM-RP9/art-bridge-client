@@ -1,8 +1,10 @@
-name: Deploy Art Bridge
+name: Deploy Frontend
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Frontend CI"]
     branches: ["main"]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -11,12 +13,10 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout infra repo
-        uses: actions/checkout@v4
-
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -27,7 +27,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${{ secrets.VM_PORT }}" -H "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy to VM
+      - name: Deploy frontend to VM
         run: |
           ssh -p "${{ secrets.VM_PORT }}" "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}" '
             set -e
@@ -43,7 +43,18 @@ jobs:
             sudo docker image prune -f
             sudo docker builder prune -f
 
-            curl -fsS http://localhost/ > /dev/null
+            for i in $(seq 1 24); do
+              if curl -fsS http://localhost/ > /dev/null 2>&1; then
+                echo "Frontend healthy"
+                break
+              fi
+              if [ $i -eq 24 ]; then
+                echo "Frontend did not become healthy after 2 minutes"
+                exit 1
+              fi
+              echo "Attempt $i/24 - not ready yet, retrying in 5s..."
+              sleep 5
+            done
 
-            sudo docker compose ps
+            sudo docker compose ps frontend
           '
