@@ -1,9 +1,15 @@
+export interface ApiFieldError {
+  field: string;
+  message: string;
+}
+
 export interface ProblemDetail {
   type?: string;
   title?: string;
   status?: number;
   detail?: string;
   instance?: string;
+  fieldErrors?: ApiFieldError[];
 }
 
 export class ApiError extends Error {
@@ -12,6 +18,7 @@ export class ApiError extends Error {
   readonly detail: string;
   readonly type: string;
   readonly instance: string;
+  readonly fieldErrors: ApiFieldError[];
 
   constructor(problem: ProblemDetail) {
     super(problem.detail ?? problem.title ?? 'Request failed');
@@ -21,6 +28,7 @@ export class ApiError extends Error {
     this.detail = problem.detail ?? '';
     this.type = problem.type ?? '';
     this.instance = problem.instance ?? '';
+    this.fieldErrors = problem.fieldErrors ?? [];
   }
 }
 
