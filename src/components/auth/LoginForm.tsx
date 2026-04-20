@@ -3,10 +3,11 @@ import React, { useState } from "react";
 interface LoginFormProps {
   isLoading?: boolean;
   error?: string;
+  fieldErrors?: { email?: string; password?: string };
   onSubmit: (data: { email: string; password: string }) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, onSubmit }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, fieldErrors, onSubmit }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string } | null>(null);
@@ -30,6 +31,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, 
     onSubmit({ email, password });
   };
 
+  const emailError = validationErrors?.email ?? fieldErrors?.email;
+  const passwordError = validationErrors?.password ?? fieldErrors?.password;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
       <fieldset disabled={isLoading} className="space-y-4" style={{ opacity: isLoading ? 0.7 : 1 }}>
@@ -44,8 +48,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, 
           className="w-full border rounded px-3 py-2"
           autoComplete="username"
         />
-        {validationErrors?.email && (
-          <div className="text-red-600 text-xs mt-1" aria-live="polite">{validationErrors.email}</div>
+        {emailError && (
+          <div className="text-red-600 text-xs mt-1" aria-live="polite">{emailError}</div>
         )}
       </div>
       <div>
@@ -59,8 +63,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, 
           className="w-full border rounded px-3 py-2"
           autoComplete="current-password"
         />
-        {validationErrors?.password && (
-          <div className="text-red-600 text-xs mt-1" aria-live="polite">{validationErrors.password}</div>
+        {passwordError && (
+          <div className="text-red-600 text-xs mt-1" aria-live="polite">{passwordError}</div>
         )}
       </div>
       {error && (
