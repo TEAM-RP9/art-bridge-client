@@ -45,6 +45,9 @@ async function request<T>(
   body?: unknown,
   opts?: RequestOptions,
 ): Promise<T> {
+  if (!path.startsWith('/')) {
+    throw new TypeError(`API client path must start with "/", got: "${path}"`);
+  }
   const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
   const url = `${base}${path}`;
 
