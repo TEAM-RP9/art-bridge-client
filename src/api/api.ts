@@ -34,12 +34,24 @@ export class ApiError extends Error {
 
 export interface RequestOptions {
   signal?: AbortSignal;
+  skipAuthRefresh?: boolean;
+}
+
+export interface AuthInterceptor {
+  refresh: () => Promise<boolean>;
+  onFailure: () => void;
+}
+
+let authInterceptor: AuthInterceptor | null = null;
+
+export function setAuthInterceptor(interceptor: AuthInterceptor | null): void {
+  authInterceptor = interceptor;
 }
 
 function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined;
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
+  const escaped = name.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+  const match = new RegExp(new RegExp(`(?:^|; )${escaped}=([^;]*)`)).exec(document.cookie);
   return match ? decodeURIComponent(match[1]) : undefined;
 }
 
@@ -52,6 +64,7 @@ async function request<T>(
   path: string,
   body?: unknown,
   opts?: RequestOptions,
+  isRetry = false,
 ): Promise<T> {
   if (!path.startsWith('/')) {
     throw new TypeError(`API client path must start with "/", got: "${path}"`);
@@ -85,6 +98,19 @@ async function request<T>(
     }
     const message = error instanceof Error ? error.message : String(error);
     throw new ApiError({ status: 0, title: 'Network error', detail: message });
+  }
+
+  if (response.status === 401 && !isRetry && !opts?.skipAuthRefresh && authInterceptor) {
+    const refreshed = await authInterceptor.refresh();
+    if (refreshed) {
+      return request<T>(method, path, body, opts, true);
+    }
+    authInterceptor.onFailure();
+    throw new ApiError({
+      status: 401,
+      title: response.statusText,
+      detail: 'Session expired',
+    });
   }
 
   if (response.status === 204) {
