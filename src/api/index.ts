@@ -5,5 +5,5 @@ setAuthInterceptor({ refresh: refreshSession, onFailure: redirectToLogin });
 
 export { ApiError, del, get, patch, post, put } from './api';
 export type { ApiFieldError, ProblemDetail, RequestOptions } from './api';
-export { login, logout, redirectToLogin } from './auth';
+export { ensureCsrfToken, googleLogin, login, logout, redirectToLogin } from './auth';
 export type { AuthResponse } from './auth';
