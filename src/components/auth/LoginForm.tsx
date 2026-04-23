@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Button, FormField, Input } from "@/components/ui";
 
 interface LoginFormProps {
   isLoading?: boolean;
@@ -35,55 +36,34 @@ export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, 
   const passwordError = validationErrors?.password ?? fieldErrors?.password;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
-      <fieldset disabled={isLoading} className="space-y-4" style={{ opacity: isLoading ? 0.7 : 1 }}>
-      <div>
-        <label htmlFor="email" className="block mb-1 font-medium">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          disabled={isLoading}
-          className="w-full border rounded px-3 py-2"
-          autoComplete="username"
-        />
-        {emailError && (
-          <div className="text-red-600 text-xs mt-1" aria-live="polite">{emailError}</div>
-        )}
-      </div>
-      <div>
-        <label htmlFor="password" className="block mb-1 font-medium">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          disabled={isLoading}
-          className="w-full border rounded px-3 py-2"
-          autoComplete="current-password"
-        />
-        {passwordError && (
-          <div className="text-red-600 text-xs mt-1" aria-live="polite">{passwordError}</div>
-        )}
-      </div>
-      {error && (
-        <div className="text-red-600 text-sm" aria-live="polite">{error}</div>
-      )}
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50 flex items-center justify-center"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <output
-            aria-live="polite"
-            className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
-            aria-label="Loading"
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <fieldset disabled={isLoading} className="space-y-4">
+        <FormField label="Email" htmlFor="email" error={emailError} required>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            autoComplete="username"
+            state={emailError ? "error" : "default"}
           />
-        ) : null}
-        Log in
-      </button>
+        </FormField>
+        <FormField label="Password" htmlFor="password" error={passwordError} required>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete="current-password"
+            state={passwordError ? "error" : "default"}
+          />
+        </FormField>
+        {error && (
+          <div className="text-destructive text-sm" aria-live="polite">{error}</div>
+        )}
+        <Button type="submit" className="w-full" isLoading={isLoading}>
+          Log in
+        </Button>
       </fieldset>
     </form>
   );
