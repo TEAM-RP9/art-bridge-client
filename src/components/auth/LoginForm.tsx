@@ -5,11 +5,18 @@ interface LoginFormProps {
   isLoading?: boolean;
   error?: string;
   fieldErrors?: { email?: string; password?: string };
+  initialEmail?: string;
   onSubmit: (data: { email: string; password: string }) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ isLoading = false, error, fieldErrors, onSubmit }) => {
-  const [email, setEmail] = useState("");
+export const LoginForm: React.FC<LoginFormProps> = ({
+  isLoading = false,
+  error,
+  fieldErrors,
+  initialEmail = "",
+  onSubmit,
+}) => {
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string } | null>(null);
 

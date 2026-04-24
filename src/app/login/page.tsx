@@ -20,6 +20,7 @@ function LoginContent() {
 
   const next = useMemo(() => sanitizeNext(searchParams.get("next")), [searchParams]);
   const isRegistered = useMemo(() => searchParams.get("registered") === "true", [searchParams]);
+  const initialEmail = useMemo(() => searchParams.get("email") || "", [searchParams]);
 
   const [pending, setPending] = useState<"idle" | "password" | "google">("idle");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -139,6 +140,7 @@ function LoginContent() {
         isLoading={isPending}
         error={error}
         fieldErrors={fieldErrors}
+        initialEmail={initialEmail}
         onSubmit={handleEmailPassword}
       />
       {GOOGLE_CLIENT_ID ? (

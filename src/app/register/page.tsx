@@ -32,8 +32,8 @@ export default function RegisterPage() {
     abortRef.current = controller;
 
     try {
-      await register(data.email.trim(), data.password, { signal: controller.signal });
-      router.push("/login?registered=true");
+      const response = await register(data.email.trim(), data.password, { signal: controller.signal });
+      router.push(`/login?registered=true&email=${encodeURIComponent(response.email)}`);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return;
