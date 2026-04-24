@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import { ApiError, ensureCsrfToken, googleLogin, login } from "@/api";
@@ -18,6 +19,8 @@ function LoginContent() {
   const auth = useAuth();
 
   const next = useMemo(() => sanitizeNext(searchParams.get("next")), [searchParams]);
+  const isRegistered = useMemo(() => searchParams.get("registered") === "true", [searchParams]);
+  const initialEmail = useMemo(() => searchParams.get("email") || "", [searchParams]);
 
   const [pending, setPending] = useState<"idle" | "password" | "google">("idle");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -120,11 +123,24 @@ function LoginContent() {
 
   const formSection = (
     <div className="w-full max-w-sm">
-      <h1 className="text-2xl font-semibold mb-6">Sign in</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">Sign in</h1>
+        <p className="text-sm text-muted-foreground mt-2">
+          Enter your email below to login to your account
+        </p>
+      </div>
+
+      {isRegistered && (
+        <div className="mb-6 p-3 rounded-md bg-green-50 border border-green-200 text-green-800 text-sm">
+          Registration successful! Please sign in to continue.
+        </div>
+      )}
+
       <LoginForm
         isLoading={isPending}
         error={error}
         fieldErrors={fieldErrors}
+        initialEmail={initialEmail}
         onSubmit={handleEmailPassword}
       />
       {GOOGLE_CLIENT_ID ? (
@@ -134,18 +150,27 @@ function LoginContent() {
             <span className="text-xs uppercase tracking-wide text-muted-foreground">or</span>
             <span className="flex-grow border-t border-border" />
           </div>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            theme="outline"
-            text="continue_with"
-            shape="rectangular"
-            size="large"
-            width={320}
-            useOneTap={false}
-          />
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_black"
+              text="continue_with"
+              shape="rectangular"
+              size="large"
+              width={320}
+              useOneTap={false}
+            />
+          </div>
         </>
       ) : null}
+
+      <p className="mt-8 text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="text-primary hover:underline font-medium">
+          Create one
+        </Link>
+      </p>
     </div>
   );
 
@@ -161,7 +186,7 @@ function LoginContent() {
         </div>
       )}
       {GOOGLE_CLIENT_ID ? (
-        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID} locale="en">
           {formSection}
         </GoogleOAuthProvider>
       ) : (
