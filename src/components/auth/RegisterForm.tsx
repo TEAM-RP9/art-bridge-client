@@ -45,11 +45,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     e.preventDefault();
     setValidationErrors(null);
     const errors: { email?: string; password?: string; confirmPassword?: string } = {};
-    if (!email) {
+    
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       errors.email = "Email is required.";
-    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)) {
       errors.email = "Invalid email address.";
     }
+
     if (password) {
       const strength = getPasswordStrength(password);
       if (strength !== "Strong") {
@@ -58,16 +61,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     } else {
       errors.password = "Password is required.";
     }
+
     if (!confirmPassword) {
       errors.confirmPassword = "Please confirm your password.";
     } else if (password && confirmPassword !== password) {
       errors.confirmPassword = "Passwords do not match.";
     }
+
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    onSubmit({ email, password, confirmPassword });
+    onSubmit({ email: trimmedEmail, password, confirmPassword });
   };
 
   const emailError = validationErrors?.email ?? fieldErrors?.email;
