@@ -48,7 +48,7 @@ export function setAuthInterceptor(interceptor: AuthInterceptor | null): void {
   authInterceptor = interceptor;
 }
 
-function getCookie(name: string): string | undefined {
+export function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined;
   const escaped = name.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
   const match = new RegExp(`(?:^|; )${escaped}=([^;]*)`).exec(document.cookie);
