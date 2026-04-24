@@ -51,7 +51,7 @@ export function setAuthInterceptor(interceptor: AuthInterceptor | null): void {
 export function getCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined;
   const escaped = name.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-  const match = new RegExp(new RegExp(`(?:^|; )${escaped}=([^;]*)`)).exec(document.cookie);
+  const match = new RegExp(`(?:^|; )${escaped}=([^;]*)`).exec(document.cookie);
   return match ? decodeURIComponent(match[1]) : undefined;
 }
 
@@ -101,7 +101,12 @@ async function request<T>(
   }
 
   if (response.status === 401 && !isRetry && !opts?.skipAuthRefresh && authInterceptor) {
-    const refreshed = await authInterceptor.refresh();
+    let refreshed = false;
+    try {
+      refreshed = await authInterceptor.refresh();
+    } catch {
+      refreshed = false;
+    }
     if (refreshed) {
       return request<T>(method, path, body, opts, true);
     }
