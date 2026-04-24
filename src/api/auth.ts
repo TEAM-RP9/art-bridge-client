@@ -11,6 +11,9 @@ export interface AuthResponse {
 export const login = (email: string, password: string, opts?: RequestOptions) =>
   post<AuthResponse>('/auth/login', { email, password }, { ...opts, skipAuthRefresh: true });
 
+export const register = (email: string, password: string, opts?: RequestOptions) =>
+  post<AuthResponse>('/auth/register', { email, password }, { ...opts, skipAuthRefresh: true });
+
 export const logout = (opts?: RequestOptions) =>
   post<void>('/auth/refresh/revoke', undefined, { ...opts, skipAuthRefresh: true });
 

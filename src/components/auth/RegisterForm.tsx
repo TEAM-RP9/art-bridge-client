@@ -1,9 +1,10 @@
 
 import React, { useState } from "react";
+import { Button, FormField, Input } from "@/components/ui";
 
 function getPasswordStrength(pw: string): string {
   if (!pw) return "";
-  if (pw.length < 8) return "Too short";
+  if (pw.length < 15) return "Too short";
   if (!/[A-Z]/.test(pw)) return "Add uppercase letter";
   if (!/[a-z]/.test(pw)) return "Add lowercase letter";
   if (!/\d/.test(pw)) return "Add number";
@@ -14,10 +15,16 @@ function getPasswordStrength(pw: string): string {
 interface RegisterFormProps {
   isLoading?: boolean;
   error?: string;
+  fieldErrors?: { email?: string; password?: string; confirmPassword?: string };
   onSubmit: (data: { email: string; password: string; confirmPassword: string }) => void;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ isLoading = false, error, onSubmit }) => {
+export const RegisterForm: React.FC<RegisterFormProps> = ({
+  isLoading = false,
+  error,
+  fieldErrors,
+  onSubmit,
+}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,10 +35,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ isLoading = false, e
   } | null>(null);
   const [passwordStrength, setPasswordStrength] = useState<string>("");
 
-
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    setPasswordStrength(getPasswordStrength(e.target.value));
+    const val = e.target.value;
+    setPassword(val);
+    setPasswordStrength(getPasswordStrength(val));
   };
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -63,83 +70,72 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ isLoading = false, e
     onSubmit({ email, password, confirmPassword });
   };
 
+  const emailError = validationErrors?.email ?? fieldErrors?.email;
+  const passwordError = validationErrors?.password ?? fieldErrors?.password;
+  const confirmPasswordError = validationErrors?.confirmPassword ?? fieldErrors?.confirmPassword;
+
+  const strengthColor =
+    passwordStrength === "Strong"
+      ? "text-green-600"
+      : passwordStrength
+      ? "text-yellow-600"
+      : "text-muted-foreground";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
-      <fieldset disabled={isLoading} className="space-y-4" style={{ opacity: isLoading ? 0.7 : 1 }}>
-        <div>
-          <label htmlFor="email" className="block mb-1 font-medium">Email</label>
-          <input
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <fieldset disabled={isLoading} className="space-y-4">
+        <FormField label="Email" htmlFor="email" error={emailError} required>
+          <Input
             id="email"
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
-            disabled={isLoading}
-            className="w-full border rounded px-3 py-2"
+            onChange={(e) => setEmail(e.target.value)}
             autoComplete="username"
+            state={emailError ? "error" : "default"}
           />
-          {validationErrors?.email && (
-            <div className="text-red-600 text-xs mt-1" aria-live="polite">{validationErrors.email}</div>
-          )}
-        </div>
-        <div>
-          <label htmlFor="password" className="block mb-1 font-medium">Password</label>
-          <input
+        </FormField>
+
+        <FormField label="Password" htmlFor="password" error={passwordError} required>
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={handlePasswordChange}
-            disabled={isLoading}
-            className="w-full border rounded px-3 py-2"
             autoComplete="new-password"
-            aria-describedby="password-strength"
+            state={passwordError ? "error" : "default"}
           />
-          {(() => {
-            let strengthClass = "text-gray-500 text-xs mt-1";
-            if (passwordStrength === "Strong") strengthClass = "text-green-600 text-xs mt-1";
-            else if (passwordStrength) strengthClass = "text-yellow-600 text-xs mt-1";
-            return (
-              <div id="password-strength" className={strengthClass} aria-live="polite">
-                {passwordStrength && passwordStrength !== "Strong" && `Strength: ${passwordStrength}`}
-                {passwordStrength === "Strong" && "Strength: Strong"}
-              </div>
-            );
-          })()}
-          {validationErrors?.password && (
-            <div className="text-red-600 text-xs mt-1" aria-live="polite">{validationErrors.password}</div>
+          {passwordStrength && (
+            <p className={`text-xs mt-1 ${strengthColor}`} aria-live="polite">
+              Strength: {passwordStrength}
+            </p>
           )}
-        </div>
-        <div>
-          <label htmlFor="confirmPassword" className="block mb-1 font-medium">Confirm Password</label>
-          <input
+        </FormField>
+
+        <FormField
+          label="Confirm Password"
+          htmlFor="confirmPassword"
+          error={confirmPasswordError}
+          required
+        >
+          <Input
             id="confirmPassword"
             type="password"
             value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-            disabled={isLoading}
-            className="w-full border rounded px-3 py-2"
+            onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password"
+            state={confirmPasswordError ? "error" : "default"}
           />
-          {validationErrors?.confirmPassword && (
-            <div className="text-red-600 text-xs mt-1" aria-live="polite">{validationErrors.confirmPassword}</div>
-          )}
-        </div>
+        </FormField>
+
         {error && (
-          <div className="text-red-600 text-sm" aria-live="polite">{error}</div>
+          <div className="text-destructive text-sm" aria-live="polite">
+            {error}
+          </div>
         )}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50 flex items-center justify-center"
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <output
-              aria-live="polite"
-              className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
-              aria-label="Loading"
-            />
-          ) : null}
+
+        <Button type="submit" className="w-full" isLoading={isLoading}>
           Register
-        </button>
+        </Button>
       </fieldset>
     </form>
   );
