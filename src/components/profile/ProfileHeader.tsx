@@ -3,6 +3,8 @@ import React from "react";
 interface ProfileHeaderProps {
   name: string;
   avatarUrl?: string;
+  role: string;
+  status: string;
 }
 
 function getInitials(name: string) {
@@ -12,7 +14,7 @@ function getInitials(name: string) {
     .join("");
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, avatarUrl }) => (
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, avatarUrl, role, status }) => (
   <div className="flex items-center gap-4">
     {avatarUrl ? (
       <img
@@ -25,7 +27,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, avatarUrl }) => (
         {getInitials(name)}
       </div>
     )}
-    <span className="text-xl font-semibold text-white drop-shadow">{name}</span>
+    <div>
+      <div className="text-xl font-semibold text-white drop-shadow">{name}</div>
+      <div className="text-sm text-blue-200">{role}</div>
+      <span className="inline-block mt-1 bg-green-700 text-white text-xs px-3 py-1 rounded-full">{status}</span>
+    </div>
   </div>
 );
 
