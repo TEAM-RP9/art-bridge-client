@@ -38,6 +38,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Claude AI ja Git worktree metadata ignoring
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

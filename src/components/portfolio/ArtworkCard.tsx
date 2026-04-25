@@ -5,9 +5,9 @@ import { type Artwork, ARTWORK_MEDIUM_LABELS } from "@/types/artwork";
 import { cn } from "@/lib/utils";
 
 interface ArtworkCardProps {
-  artwork: Artwork;
-  onClick?: (artwork: Artwork) => void;
-  className?: string;
+  readonly artwork: Artwork;
+  readonly onClick?: (artwork: Artwork) => void;
+  readonly className?: string;
 }
 
 export function ArtworkCard({ artwork, onClick, className }: ArtworkCardProps) {
