@@ -94,7 +94,7 @@ function validateDetails(formData: ArtworkFormData): Partial<Record<keyof Artwor
   const errors: Partial<Record<keyof ArtworkFormData, string>> = {};
   if (!formData.title.trim()) errors.title = "Title is required";
   if (formData.title.trim().length > 100) errors.title = "Title is too long (max 100 chars)";
-  if (formData.description.length > 1000) errors.description = "Description is too long (max 1000 chars)";
+  if (formData.description.length > 500) errors.description = "Description is too long (max 500 chars)";
   if (formData.widthStr && Number.isNaN(Number(formData.widthStr))) errors.widthStr = "Width must be a number";
   if (formData.heightStr && Number.isNaN(Number(formData.heightStr))) errors.heightStr = "Height must be a number";
   if (formData.yearStr) {
@@ -200,8 +200,8 @@ function Step2Details({ formData, formErrors, tagInput, aiFilledFields, onFormCh
       <FormField label="Description" htmlFor="description" error={formErrors.description}>
         <Textarea id="description" value={formData.description}
           onChange={(e) => onFormChange({ description: e.target.value })}
-          placeholder="Describe your artwork, technique, inspiration..." rows={5} maxLength={1000} />
-        <p className="text-right text-xs text-muted-foreground">{formData.description.length}/1000</p>
+          placeholder="Describe your artwork, technique, inspiration..." rows={5} maxLength={500} />
+        <p className="text-right text-xs text-muted-foreground">{formData.description.length}/500</p>
       </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -300,16 +300,23 @@ function Step3Publish({ imagePreviewUrl, formData, submitError, onFormChange }: 
         <div className="overflow-hidden rounded-xl border border-border">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imagePreviewUrl} alt="Artwork preview" className="aspect-[4/3] w-full object-cover" />
-          <div className="p-4">
+          <div className="p-4 space-y-2">
             <h3 className="font-semibold">{formData.title}</h3>
-            {formData.medium && <p className="text-sm text-muted-foreground">{formData.medium}</p>}
-            {formData.description && <p className="mt-2 line-clamp-3 text-sm text-foreground">{formData.description}</p>}
-            {(formData.widthStr || formData.heightStr) && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {formData.widthStr} × {formData.heightStr} {formData.unit}
-                {formData.yearStr && ` · ${formData.yearStr}`}
-              </p>
-            )}
+            {formData.medium && <p className="text-sm text-muted-foreground">{formData.medium}{formData.yearStr ? ` · ${formData.yearStr}` : ""}</p>}
+            {!formData.medium && formData.yearStr && <p className="text-sm text-muted-foreground">{formData.yearStr}</p>}
+            {formData.description && <p className="line-clamp-3 text-sm text-foreground">{formData.description}</p>}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {formData.category && (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary capitalize">
+                  {formData.category.replace("-", " ")}
+                </span>
+              )}
+              {(formData.widthStr || formData.heightStr) && (
+                <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
+                  {formData.widthStr} × {formData.heightStr} {formData.unit}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -317,39 +324,40 @@ function Step3Publish({ imagePreviewUrl, formData, submitError, onFormChange }: 
       <fieldset className="space-y-4 rounded-xl border border-border p-4">
         <legend className="px-1 text-sm font-semibold">Publication Settings</legend>
 
-        <div className="flex cursor-pointer items-center justify-between">
-          <div className="flex items-start gap-2">
-            <input id="show-on-profile" type="checkbox" checked={formData.showOnProfile}
-              onChange={(e) => onFormChange({ showOnProfile: e.target.checked })}
-              className="mt-1 h-4 w-4 rounded accent-primary" />
-            <label htmlFor="show-on-profile" className="block cursor-pointer">
-              <span className="text-sm font-medium">Show on public profile</span>
-              <p className="text-xs text-muted-foreground">Visitors can see this artwork on your profile page</p>
-            </label>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <span id="label-show-on-profile" className="text-sm font-medium">Show on public profile</span>
+            <p className="text-xs text-muted-foreground">Visitors can see this artwork on your profile page</p>
           </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={formData.showOnProfile}
+            aria-labelledby="label-show-on-profile"
+            onClick={() => onFormChange({ showOnProfile: !formData.showOnProfile })}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${formData.showOnProfile ? "bg-primary" : "bg-input"}`}
+          >
+            <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${formData.showOnProfile ? "translate-x-5" : "translate-x-0"}`} />
+          </button>
         </div>
 
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Status</p>
-          {(["draft", "published"] as const).map((status) => (
-            <label key={status} className="flex cursor-pointer items-center gap-3">
-              <input
-                type="radio"
-                name="status"
-                value={status}
-                checked={formData.status === status}
-                onChange={() => onFormChange({ status })}
-                className="accent-primary"
-                aria-label={status.charAt(0).toUpperCase() + status.slice(1)}
-              />
-              <div>
-                <span className="text-sm font-medium capitalize">{status}</span>
-                <p className="text-xs text-muted-foreground">
-                  {status === "draft" ? "Save privately, publish later" : "Make visible to everyone now"}
-                </p>
-              </div>
-            </label>
-          ))}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <span id="label-publish-now" className="text-sm font-medium">Publish now</span>
+            <p className="text-xs text-muted-foreground">
+              {formData.status === "published" ? "Make visible to everyone now" : "Save privately, publish later"}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={formData.status === "published"}
+            aria-labelledby="label-publish-now"
+            onClick={() => onFormChange({ status: formData.status === "published" ? "draft" : "published" })}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${formData.status === "published" ? "bg-primary" : "bg-input"}`}
+          >
+            <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${formData.status === "published" ? "translate-x-5" : "translate-x-0"}`} />
+          </button>
         </div>
       </fieldset>
 
@@ -452,7 +460,7 @@ export default function NewArtworkPage() {
       };
       const artwork = await createArtwork(payload);
       await uploadArtworkImage(artwork.id, imageFile);
-      router.push(`/dashboard/artworks/${artwork.id}`);
+      router.push("/dashboard/artworks");
     } catch (err) {
       setSubmitError(err instanceof ApiError ? (err.detail ?? err.title ?? "Failed to save artwork") : "Something went wrong. Please try again.");
     } finally {
