@@ -360,7 +360,8 @@ function Step3Publish({ imagePreviewUrl, formData, submitError, onFormChange }: 
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-function useArtworkPageState() {
+export default function NewArtworkPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -373,37 +374,10 @@ function useArtworkPageState() {
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  return {
-    currentStep, setCurrentStep,
-    imageFile, setImageFile,
-    imagePreviewUrl, setImagePreviewUrl,
-    uploadError, setUploadError,
-    aiState, setAiState,
-    aiTimerRef,
-    formData, setFormData,
-    formErrors, setFormErrors,
-    tagInput, setTagInput,
-    aiFilledFields, setAiFilledFields,
-    isSubmitting, setIsSubmitting,
-    submitError, setSubmitError
-  };
-}
 
-function useAiTimerCleanup(aiTimerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>) {
-  useEffect(() => () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); }, [aiTimerRef]);
-}
+  useEffect(() => () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); }, []);
 
-function handleFileSelectFactory({
-  setUploadError,
-  setImageFile,
-  imagePreviewUrl,
-  setImagePreviewUrl,
-  setAiState,
-  aiTimerRef,
-  setFormData,
-  setAiFilledFields
-}: any) {
-  return (file: File) => {
+  const handleFileSelect = useCallback((file: File) => {
     setUploadError(null);
     setImageFile(file);
     if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
@@ -412,31 +386,6 @@ function handleFileSelectFactory({
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     aiTimerRef.current = setTimeout(() => {
       const meta = extractAiMetadata(file);
-      setFormData((prev: ArtworkFormData) => ({ ...prev, ...meta }));
-      setAiFilledFields(new Set(Object.keys(meta)));
-      setAiState("done");
-    }, 1200);
-  };
-}
-
-export default function NewArtworkPage() {
-  const router = useRouter();
-  const state = useArtworkPageState();
-  useAiTimerCleanup(state.aiTimerRef);
-
-  const handleFileSelect = useCallback(
-    handleFileSelectFactory({
-      setUploadError: state.setUploadError,
-      setImageFile: state.setImageFile,
-      imagePreviewUrl: state.imagePreviewUrl,
-      setImagePreviewUrl: state.setImagePreviewUrl,
-      setAiState: state.setAiState,
-      aiTimerRef: state.aiTimerRef,
-      setFormData: state.setFormData,
-      setAiFilledFields: state.setAiFilledFields
-    }),
-    [state.imagePreviewUrl]
-  );
       const filled = new Set<string>();
       setFormData((prev) => {
         const next = { ...prev };
