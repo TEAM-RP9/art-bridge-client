@@ -25,8 +25,12 @@ export default function ArtworkDetailPage({ params }: Readonly<ArtworkDetailPage
     getArtwork(id)
       .then((data) => { if (!cancelled) setArtwork(data); })
       .catch((err) => {
-        if (!cancelled && err instanceof ApiError && err.status === 404) {
-          setNotFoundError(true);
+        if (!cancelled && err instanceof ApiError) {
+          if (err.status === 404) {
+            setNotFoundError(true);
+          } else if (err.status === 403) {
+            router.replace("/dashboard/artworks");
+          }
         }
       })
       .finally(() => { if (!cancelled) setIsLoading(false); });
