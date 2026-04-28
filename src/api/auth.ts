@@ -1,4 +1,4 @@
-import { get, post, getCookie } from './api';
+import { post } from './api';
 import type { RequestOptions } from './api';
 import { sanitizeNext } from '@/lib/next-param';
 
@@ -24,12 +24,6 @@ export const logout = (opts?: RequestOptions) =>
 
 export const googleLogin = (idToken: string, opts?: RequestOptions) =>
   post<AuthResponse>('/auth/oauth/google', { idToken }, { ...opts, skipAuthRefresh: true });
-
-export async function ensureCsrfToken(opts?: RequestOptions): Promise<void> {
-  if (!getCookie('XSRF-TOKEN')) {
-    await get('/auth/csrf', { ...opts, skipAuthRefresh: true });
-  }
-}
 
 let refreshInFlight: Promise<boolean> | null = null;
 
