@@ -10,6 +10,7 @@ interface ProfileHeaderProps {
 // Placeholder UserAvatar component
 const UserAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avatarUrl }) => {
   if (avatarUrl) {
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={avatarUrl} alt={name} className="user-avatar" style={{ width: 64, height: 64, borderRadius: '50%' }} />;
   }
   // Initials fallback

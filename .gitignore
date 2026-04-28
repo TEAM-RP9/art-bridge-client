@@ -38,6 +38,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Claude AI — local config, worktrees, project memory
+.claude/
+CLAUDE.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# planning docs
+PORTFOLIO_PLAN.md

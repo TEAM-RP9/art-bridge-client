@@ -71,3 +71,12 @@ export type { SwitchProps } from "./Switch";
 
 export { Textarea, textareaVariants } from "./Textarea";
 export type { TextareaProps } from "./Textarea";
+
+export { FileUpload } from "./FileUpload";
+export type { FileUploadProps } from "./FileUpload";
+
+export { ImagePreview } from "./ImagePreview";
+export type { ImagePreviewProps } from "./ImagePreview";
+
+export { Stepper } from "./Stepper";
+export type { StepperProps, StepperStep } from "./Stepper";

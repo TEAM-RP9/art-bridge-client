@@ -79,6 +79,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     const isDisabled = Boolean(disabled) || isLoading;
 
+    // Runtime check: if asChild is true, children must be exactly one React element
+    if (asChild && React.Children.count(children) !== 1) {
+      throw new Error(
+        "[Button]: When using 'asChild', the Button component expects exactly one React element as its child."
+      );
+    }
+
     return (
       <Comp
         ref={ref}
