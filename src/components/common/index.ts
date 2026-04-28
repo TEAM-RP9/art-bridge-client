@@ -14,6 +14,8 @@ export type { EmptyStateProps } from "./EmptyState";
 export { ImageDropzone } from "./ImageDropzone";
 export type { ImageDropzoneProps, UploadState } from "./ImageDropzone";
 
+export { PublicNav } from "./PublicNav";
+
 export { PageHeader } from "./PageHeader";
 export type { PageHeaderProps } from "./PageHeader";
 
