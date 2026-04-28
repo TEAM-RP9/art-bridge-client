@@ -71,14 +71,24 @@ export function ArtworkCard({
             {artwork.year ? `, ${artwork.year}` : ""}
           </p>
         )}
-        {artwork.status === "published" && artwork.viewCount > 0 && (
-          <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            {artwork.viewCount.toLocaleString()}
+        {artwork.status === "published" && (
+          <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {artwork.viewCount.toLocaleString()}
+            </span>
+            <span className="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {artwork.likeCount.toLocaleString()}
+            </span>
           </div>
         )}
       </div>
