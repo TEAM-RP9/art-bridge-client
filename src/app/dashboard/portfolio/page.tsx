@@ -33,11 +33,11 @@ function PortfolioPreview({
   profile,
   artworks,
   isLoading,
-}: {
+}: Readonly<{
   profile: ArtistProfile;
   artworks: ArtworkResponse[];
   isLoading: boolean;
-}) {
+}>) {
   const initials = profile.name
     .split(" ")
     .map((n) => n[0]?.toUpperCase() ?? "")
@@ -84,20 +84,28 @@ function PortfolioPreview({
       </div>
 
       {/* Artwork grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
-          ))}
-        </div>
-      ) : artworks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 py-20 text-center">
-          <p className="text-sm text-muted-foreground">No artworks in portfolio yet.</p>
-          <p className="mt-1 text-xs text-muted-foreground">Switch to Edit to add artworks.</p>
-        </div>
-      ) : (
-        <div className="columns-2 gap-4 sm:columns-3">
-          {artworks.map((artwork) => {
+      {(() => {
+        if (isLoading) {
+          return (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {Array.from({length: 6}).map((_, i) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <div key={`sk-${i}`} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
+              ))}
+            </div>
+          );
+        }
+        if (artworks.length === 0) {
+          return (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 py-20 text-center">
+              <p className="text-sm text-muted-foreground">No artworks in portfolio yet.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Switch to Edit to add artworks.</p>
+            </div>
+          );
+        }
+        return (
+          <div className="columns-2 gap-4 sm:columns-3">
+            {artworks.map((artwork) => {
             const img = artwork.images.find((i) => i.isPrimary) ?? artwork.images[0];
             return (
               <div key={artwork.id} className="mb-4 break-inside-avoid overflow-hidden rounded-xl border border-border bg-card group">
@@ -129,8 +137,9 @@ function PortfolioPreview({
               </div>
             );
           })}
-        </div>
-      )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -146,7 +155,7 @@ function PortfolioEdit({
   onMove,
   onToggle,
   togglingId,
-}: {
+}: Readonly<{
   profile: ArtistProfile;
   onProfileSave: (p: ArtistProfile) => void;
   visible: ArtworkResponse[];
@@ -155,7 +164,7 @@ function PortfolioEdit({
   onMove: (i: number, dir: -1 | 1) => void;
   onToggle: (a: ArtworkResponse) => void;
   togglingId: string | null;
-}) {
+}>) {
   const [editingProfile, setEditingProfile] = useState(false);
   const [profileDraft, setProfileDraft] = useState<ArtistProfile>(profile);
 
@@ -169,7 +178,35 @@ function PortfolioEdit({
     <div>
       {/* Profile card */}
       <div className="mb-10 overflow-hidden rounded-2xl border border-border bg-card">
-        {!editingProfile ? (
+        {editingProfile ? (
+          <div className="p-6 space-y-4">
+            <h3 className="font-semibold">Edit Profile</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="Name" htmlFor="p-name">
+                <Input id="p-name" value={profileDraft.name}
+                  onChange={(e) => setProfileDraft((p) => ({ ...p, name: e.target.value }))} />
+              </FormField>
+              <FormField label="Location" htmlFor="p-location">
+                <Input id="p-location" value={profileDraft.location}
+                  placeholder="City, Country"
+                  onChange={(e) => setProfileDraft((p) => ({ ...p, location: e.target.value }))} />
+              </FormField>
+            </div>
+            <FormField label="Bio" htmlFor="p-bio">
+              <Textarea id="p-bio" value={profileDraft.bio} rows={3}
+                onChange={(e) => setProfileDraft((p) => ({ ...p, bio: e.target.value }))} />
+            </FormField>
+            <FormField label="Website" htmlFor="p-website">
+              <Input id="p-website" value={profileDraft.website}
+                placeholder="https://yourwebsite.com"
+                onChange={(e) => setProfileDraft((p) => ({ ...p, website: e.target.value }))} />
+            </FormField>
+            <div className="flex gap-2 justify-end pt-2">
+              <Button variant="ghost" onClick={() => setEditingProfile(false)}>Cancel</Button>
+              <Button onClick={() => { onProfileSave(profileDraft); setEditingProfile(false); }}>Save Profile</Button>
+            </div>
+          </div>
+        ) : (
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-start">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
               {initials}
@@ -204,34 +241,6 @@ function PortfolioEdit({
               Edit Profile
             </Button>
           </div>
-        ) : (
-          <div className="p-6 space-y-4">
-            <h3 className="font-semibold">Edit Profile</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Name" htmlFor="p-name">
-                <Input id="p-name" value={profileDraft.name}
-                  onChange={(e) => setProfileDraft((p) => ({ ...p, name: e.target.value }))} />
-              </FormField>
-              <FormField label="Location" htmlFor="p-location">
-                <Input id="p-location" value={profileDraft.location}
-                  placeholder="City, Country"
-                  onChange={(e) => setProfileDraft((p) => ({ ...p, location: e.target.value }))} />
-              </FormField>
-            </div>
-            <FormField label="Bio" htmlFor="p-bio">
-              <Textarea id="p-bio" value={profileDraft.bio} rows={3}
-                onChange={(e) => setProfileDraft((p) => ({ ...p, bio: e.target.value }))} />
-            </FormField>
-            <FormField label="Website" htmlFor="p-website">
-              <Input id="p-website" value={profileDraft.website}
-                placeholder="https://yourwebsite.com"
-                onChange={(e) => setProfileDraft((p) => ({ ...p, website: e.target.value }))} />
-            </FormField>
-            <div className="flex gap-2 justify-end pt-2">
-              <Button variant="ghost" onClick={() => setEditingProfile(false)}>Cancel</Button>
-              <Button onClick={() => { onProfileSave(profileDraft); setEditingProfile(false); }}>Save Profile</Button>
-            </div>
-          </div>
         )}
       </div>
 
@@ -241,7 +250,7 @@ function PortfolioEdit({
           <div>
             <h2 className="text-lg font-semibold">In Portfolio</h2>
             <p className="text-sm text-muted-foreground">
-              {visible.length} artwork{visible.length !== 1 ? "s" : ""} visible to visitors
+              {visible.length} artwork{visible.length === 1 ? "" : "s"} visible to visitors
             </p>
           </div>
           <Link href="/dashboard/artworks/new">
@@ -249,33 +258,42 @@ function PortfolioEdit({
           </Link>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
-            ))}
-          </div>
-        ) : visible.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card py-16 text-center">
-            <p className="text-sm text-muted-foreground">No artworks in portfolio yet.</p>
-            <p className="mt-1 text-xs text-muted-foreground">Add artworks from the section below or upload new ones.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {visible.map((artwork, index) => (
-              <PortfolioCard
-                key={artwork.id}
-                artwork={artwork}
-                index={index}
-                total={visible.length}
-                onMove={onMove}
-                onToggle={onToggle}
-                isToggling={togglingId === artwork.id}
-                inPortfolio
-              />
-            ))}
-          </div>
-        )}
+        {(() => {
+          if (isLoading) {
+            return (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {Array.from({length: 4}).map((_, i) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <div key={`sk-${i}`} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
+                ))}
+              </div>
+            );
+          }
+          if (visible.length === 0) {
+            return (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card py-16 text-center">
+                <p className="text-sm text-muted-foreground">No artworks in portfolio yet.</p>
+                <p className="mt-1 text-xs text-muted-foreground">Add artworks from the section below or upload new ones.</p>
+              </div>
+            );
+          }
+          return (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {visible.map((artwork, index) => (
+                <PortfolioCard
+                  key={artwork.id}
+                  artwork={artwork}
+                  index={index}
+                  total={visible.length}
+                  onMove={onMove}
+                  onToggle={onToggle}
+                  isToggling={togglingId === artwork.id}
+                  inPortfolio
+                />
+              ))}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Not in portfolio */}
@@ -284,7 +302,7 @@ function PortfolioEdit({
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-muted-foreground">Not in Portfolio</h2>
             <p className="text-sm text-muted-foreground">
-              {hidden.length} artwork{hidden.length !== 1 ? "s" : ""} hidden from public profile
+              {hidden.length} artwork{hidden.length === 1 ? "" : "s"} hidden from public profile
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -330,6 +348,13 @@ function PortfolioCard({
 }: Readonly<PortfolioCardProps>) {
   const primaryImage =
     artwork.images.find((img) => img.isPrimary) ?? artwork.images[0];
+
+  let toggleLabel: string;
+  if (isToggling) {
+    toggleLabel = "...";
+  } else {
+    toggleLabel = inPortfolio ? "Hide" : "Show";
+  }
 
   return (
     <div className={`group relative overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md ${inPortfolio ? "border-border" : "border-dashed border-border opacity-60"}`}>
@@ -400,7 +425,7 @@ function PortfolioCard({
                 : "bg-primary text-primary-foreground hover:bg-primary/90"
             }`}
           >
-            {isToggling ? "..." : inPortfolio ? "Hide" : "Show"}
+            {toggleLabel}
           </button>
         </div>
       </div>
