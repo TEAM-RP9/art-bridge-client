@@ -27,3 +27,6 @@ export type {
   UpdateArtworkRequest,
   UploadImageResponse,
 } from './artworks';
+
+export { normalizeMediaUrl, uploadMedia } from './media';
+export type { MediaUploadResponse } from './media';

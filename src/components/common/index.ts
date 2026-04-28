@@ -11,8 +11,14 @@
 export { EmptyState } from "./EmptyState";
 export type { EmptyStateProps } from "./EmptyState";
 
+export { ImageDropzone } from "./ImageDropzone";
+export type { ImageDropzoneProps, UploadState } from "./ImageDropzone";
+
 export { PageHeader } from "./PageHeader";
 export type { PageHeaderProps } from "./PageHeader";
 
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps } from "./Skeleton";
+
+export { Stepper } from "./Stepper";
+export type { StepperProps } from "./Stepper";
