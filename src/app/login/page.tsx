@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
-import { ApiError, ensureCsrfToken, googleLogin, login } from "@/api";
+import { ApiError, googleLogin, login } from "@/api";
 import type { AuthResponse } from "@/api";
 import { useAuth } from "@/auth";
 import { sanitizeNext } from "@/lib/next-param";
@@ -18,9 +18,9 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const auth = useAuth();
 
-  const next = useMemo(() => sanitizeNext(searchParams.get("next")), [searchParams]);
-  const isRegistered = useMemo(() => searchParams.get("registered") === "true", [searchParams]);
-  const initialEmail = useMemo(() => searchParams.get("email") || "", [searchParams]);
+  const next = useMemo(() => sanitizeNext(searchParams?.get("next") ?? null), [searchParams]);
+  const isRegistered = useMemo(() => searchParams?.get("registered") === "true", [searchParams]);
+  const initialEmail = useMemo(() => searchParams?.get("email") ?? "", [searchParams]);
 
   const [pending, setPending] = useState<"idle" | "password" | "google">("idle");
   const [error, setError] = useState<string | undefined>(undefined);
@@ -28,7 +28,6 @@ function LoginContent() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    ensureCsrfToken().catch(() => {});
     return () => {
       abortRef.current?.abort();
     };
@@ -182,6 +181,7 @@ function LoginContent() {
             className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
             aria-label="Loading"
             role="status"
+            aria-live="polite"
           />
         </div>
       )}

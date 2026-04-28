@@ -1,6 +1,12 @@
-import { get, post, getCookie } from './api';
+import { post } from './api';
 import type { RequestOptions } from './api';
 import { sanitizeNext } from '@/lib/next-param';
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+
+function mockDelay<T>(value: T): Promise<T> {
+  return new Promise((resolve) => setTimeout(() => resolve(value), 200));
+}
 
 export interface AuthResponse {
   userId: number;
@@ -25,12 +31,6 @@ export const logout = (opts?: RequestOptions) =>
 export const googleLogin = (idToken: string, opts?: RequestOptions) =>
   post<AuthResponse>('/auth/oauth/google', { idToken }, { ...opts, skipAuthRefresh: true });
 
-export async function ensureCsrfToken(opts?: RequestOptions): Promise<void> {
-  if (!getCookie('XSRF-TOKEN')) {
-    await get('/auth/csrf', { ...opts, skipAuthRefresh: true });
-  }
-}
-
 let refreshInFlight: Promise<boolean> | null = null;
 
 export async function refreshSession(): Promise<boolean> {
@@ -49,6 +49,13 @@ export async function refreshSession(): Promise<boolean> {
 
   return refreshInFlight;
 }
+
+const MOCK_USER: AuthResponse = { userId: 1, email: 'artist@example.com', role: 'ARTIST' };
+
+export const getCurrentUser = (opts?: RequestOptions): Promise<AuthResponse> => {
+  if (USE_MOCK) return mockDelay(MOCK_USER);
+  return get<AuthResponse>('/auth/me', { ...opts, skipAuthRefresh: true });
+};
 
 export function redirectToLogin(): void {
   console.warn('[auth] session refresh failed, redirecting to login');

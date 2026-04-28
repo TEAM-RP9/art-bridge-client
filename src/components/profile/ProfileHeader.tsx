@@ -17,6 +17,7 @@ function getInitials(name: string) {
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, avatarUrl, role, status }) => (
   <div className="flex items-center gap-4">
     {avatarUrl ? (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={avatarUrl}
         alt={name}
