@@ -1,4 +1,4 @@
-import { post } from './api';
+import { get, post } from './api';
 import type { RequestOptions } from './api';
 import { sanitizeNext } from '@/lib/next-param';
 
