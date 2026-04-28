@@ -166,9 +166,7 @@ export default function AddArtworkPage() {
   const handleDragEnter = () => dispatch({ type: "DRAG_ENTER" });
   const handleDragLeave = () => dispatch({ type: "DRAG_LEAVE" });
 
-  const handleNext = () => {
-    console.log("advance to step 2 — out of scope");
-  };
+  const handleNext = () => {};
 
   const isUploaded = state.status === "uploaded";
 

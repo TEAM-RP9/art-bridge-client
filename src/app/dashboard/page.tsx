@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 "use client";
 
 import { useEffect } from "react";
@@ -10,8 +9,14 @@ import LogoutButton from "@/components/auth/LogoutButton";
 import { Button } from "@/components/ui";
 
 export default function DashboardPage() {
-  redirect("/dashboard/artworks");
-}
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      router.replace("/login?next=/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <main className="p-6">
