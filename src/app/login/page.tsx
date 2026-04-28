@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
-import { ApiError, ensureCsrfToken, googleLogin, login } from "@/api";
+import { ApiError, googleLogin, login } from "@/api";
 import type { AuthResponse } from "@/api";
 import { useAuth } from "@/auth";
 import { sanitizeNext } from "@/lib/next-param";
@@ -28,7 +28,6 @@ function LoginContent() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    ensureCsrfToken().catch(() => {});
     return () => {
       abortRef.current?.abort();
     };

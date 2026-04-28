@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ApiError, register, ensureCsrfToken } from "@/api";
+import { ApiError, register } from "@/api";
 import RegisterForm from "@/components/auth/RegisterForm";
 
 export default function RegisterPage() {
@@ -16,7 +16,6 @@ export default function RegisterPage() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    ensureCsrfToken().catch(() => {});
     return () => {
       abortRef.current?.abort();
     };
