@@ -59,19 +59,16 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 const MUTATING_METHODS: ReadonlySet<HttpMethod> = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 // Callers must pass paths starting with "/" — the base is concatenated as-is.
-async function request<T>(
-  method: HttpMethod,
-  path: string,
-  body?: unknown,
-  opts?: RequestOptions,
-  isRetry = false,
-): Promise<T> {
+
+function buildUrl(path: string): string {
   if (!path.startsWith('/')) {
     throw new TypeError(`API client path must start with "/", got: "${path}"`);
   }
   const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? '/api';
-  const url = `${base}${path}`;
+  return `${base}${path}`;
+}
 
+function buildHeaders(method: HttpMethod, body?: unknown): Record<string, string> {
   const headers: Record<string, string> = {};
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
@@ -82,24 +79,17 @@ async function request<T>(
       headers['X-XSRF-TOKEN'] = csrf;
     }
   }
+  return headers;
+}
 
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method,
-      headers,
-      credentials: 'include',
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal: opts?.signal,
-    });
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw error;
-    }
-    const message = error instanceof Error ? error.message : String(error);
-    throw new ApiError({ status: 0, title: 'Network error', detail: message });
-  }
-
+async function handle401<T>(
+  method: HttpMethod,
+  path: string,
+  body: unknown,
+  opts: RequestOptions | undefined,
+  isRetry: boolean,
+  response: Response
+): Promise<T> {
   if (response.status === 401 && !isRetry && !opts?.skipAuthRefresh && authInterceptor) {
     let refreshed = false;
     try {
@@ -117,6 +107,70 @@ async function request<T>(
       detail: 'Session expired',
     });
   }
+  return undefined as unknown as T;
+}
+
+function handleNetworkError(error: unknown): never {
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    throw error;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  throw new ApiError({ status: 0, title: 'Network error', detail: message });
+}
+
+function handleNotOkResponse(response: Response, text: string): never {
+  if (text) {
+    let parsed: ProblemDetail | null = null;
+    try {
+      parsed = JSON.parse(text) as ProblemDetail;
+    } catch {
+      parsed = null;
+    }
+    if (parsed !== null) {
+      throw new ApiError(parsed);
+    }
+  }
+  throw new ApiError({
+    status: response.status,
+    title: response.statusText,
+    detail: 'Request failed',
+  });
+}
+
+async function request<T>(
+  method: HttpMethod,
+  path: string,
+  body?: unknown,
+  opts?: RequestOptions,
+  isRetry = false,
+): Promise<T> {
+  const url = buildUrl(path);
+  const headers = buildHeaders(method, body);
+
+
+  let response: Response;
+  try {
+    let requestBody: string | undefined;
+    if (body === undefined) {
+      requestBody = undefined;
+    } else {
+      requestBody = JSON.stringify(body);
+    }
+    response = await fetch(url, {
+      method,
+      headers,
+      credentials: 'include',
+      body: requestBody,
+      signal: opts?.signal,
+    });
+  } catch (error) {
+    handleNetworkError(error);
+  }
+
+  // Handle 401
+  if (response.status === 401 && !isRetry && !opts?.skipAuthRefresh && authInterceptor) {
+    return handle401<T>(method, path, body, opts, isRetry, response);
+  }
 
   if (response.status === 204) {
     return undefined as T;
@@ -125,22 +179,7 @@ async function request<T>(
   const text = await response.text();
 
   if (!response.ok) {
-    if (text) {
-      let parsed: ProblemDetail | null = null;
-      try {
-        parsed = JSON.parse(text) as ProblemDetail;
-      } catch {
-        parsed = null;
-      }
-      if (parsed !== null) {
-        throw new ApiError(parsed);
-      }
-    }
-    throw new ApiError({
-      status: response.status,
-      title: response.statusText,
-      detail: 'Request failed',
-    });
+    handleNotOkResponse(response, text);
   }
 
   if (!text) {

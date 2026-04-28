@@ -3,7 +3,8 @@
  * Keep this file dependency-free — it is imported by both UI and store layers.
  */
 
-export type ArtworkMedium =
+
+export type ArtworkType =
 	| "painting"
 	| "drawing"
 	| "photography"
@@ -12,14 +13,14 @@ export type ArtworkMedium =
 	| "mixed-media"
 	| "other";
 
-export const ARTWORK_MEDIUM_LABELS: Record<ArtworkMedium, string> = {
-	painting: "Maal",
-	drawing: "Joonistus",
-	photography: "Fotograafia",
-	sculpture: "Skulptuur",
-	digital: "Digitaalne",
-	"mixed-media": "Segatehnika",
-	other: "Muu",
+export const ARTWORK_TYPE_LABELS: Record<ArtworkType, string> = {
+	painting: "Painting",
+	drawing: "Drawing",
+	photography: "Photography",
+	sculpture: "Sculpture",
+	digital: "Digital",
+	"mixed-media": "Mixed media",
+	other: "Other",
 };
 
 export interface Artwork {
@@ -27,7 +28,7 @@ export interface Artwork {
 	artistId: string;
 	title: string;
 	imageUrl: string;
-	medium: ArtworkMedium;
+	type: ArtworkType;
 	year: number;
 	width?: number;
 	height?: number;

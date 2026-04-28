@@ -18,9 +18,9 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const auth = useAuth();
 
-  const next = useMemo(() => sanitizeNext(searchParams.get("next")), [searchParams]);
-  const isRegistered = useMemo(() => searchParams.get("registered") === "true", [searchParams]);
-  const initialEmail = useMemo(() => searchParams.get("email") || "", [searchParams]);
+  const next = useMemo(() => sanitizeNext(searchParams?.get("next") ?? null), [searchParams]);
+  const isRegistered = useMemo(() => searchParams?.get("registered") === "true", [searchParams]);
+  const initialEmail = useMemo(() => searchParams?.get("email") ?? "", [searchParams]);
 
   const [pending, setPending] = useState<"idle" | "password" | "google">("idle");
   const [error, setError] = useState<string | undefined>(undefined);
