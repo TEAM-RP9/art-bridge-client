@@ -27,11 +27,11 @@ export const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork }) => {
         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <EyeIcon className="h-4 w-4" />
-            <span>{artwork.viewCount}</span>
+            <span>{artwork.viewsCount}</span>
           </div>
           <div className="flex items-center gap-1">
             <HeartIcon className="h-4 w-4 text-destructive" />
-            <span>{artwork.likeCount}</span>
+            <span>{artwork.likesCount}</span>
           </div>
         </div>
       </CardContent>

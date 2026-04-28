@@ -5,8 +5,8 @@ export interface Artwork {
   title: string;
   description?: string;
   imageUrl: string;
-  viewCount: number;
-  likeCount: number;
+  viewsCount: number;
+  likesCount: number;
   category?: string;
   medium?: string;
   dimensions?: {
@@ -14,7 +14,7 @@ export interface Artwork {
     height: number;
     unit: string;
   };
-  yearCreated?: number;
+  creationYear?: number;
   tags?: string[];
   status: 'DRAFT' | 'PUBLISHED';
   showOnProfile: boolean;
@@ -33,7 +33,7 @@ export interface CreateArtworkRequest {
     height: number;
     unit: string;
   };
-  yearCreated?: number;
+  creationYear?: number;
   tags?: string[];
   status: 'DRAFT' | 'PUBLISHED';
   showOnProfile: boolean;
@@ -41,14 +41,14 @@ export interface CreateArtworkRequest {
 
 export interface PaginatedResponse<T> {
   items: T[];
-  total: number;
-  page: number;
-  size: number;
-  pages: number;
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export const getArtworks = (page = 1, size = 10) =>
-  get<PaginatedResponse<Artwork>>(`/artworks?page=${page}&size=${size}`);
+  get<PaginatedResponse<Artwork>>(`/artworks/my?page=${page - 1}&size=${size}`);
 
 export const createArtwork = (artwork: CreateArtworkRequest) =>
   post<Artwork>('/artworks', artwork);

@@ -30,7 +30,7 @@ export default function NewArtworkPage() {
     category: "",
     medium: "",
     dimensions: { width: 0, height: 0, unit: "cm" },
-    yearCreated: new Date().getFullYear(),
+    creationYear: new Date().getFullYear(),
     tags: [],
     status: "DRAFT",
     showOnProfile: true,
@@ -207,8 +207,8 @@ export default function NewArtworkPage() {
               <FormField label="Year Created">
                 <Input
                   type="number"
-                  value={formData.yearCreated}
-                  onChange={(e) => setFormData({ ...formData, yearCreated: Number(e.target.value) })}
+                  value={formData.creationYear}
+                  onChange={(e) => setFormData({ ...formData, creationYear: Number(e.target.value) })}
                 />
               </FormField>
             </div>
@@ -223,7 +223,7 @@ export default function NewArtworkPage() {
                 <div className="flex-1 space-y-4">
                   <div>
                     <h3 className="text-xl font-bold">{formData.title || "Untitled"}</h3>
-                    <p className="text-muted-foreground">{formData.medium} • {formData.yearCreated}</p>
+                    <p className="text-muted-foreground">{formData.medium} • {formData.creationYear}</p>
                   </div>
                   <p className="text-sm line-clamp-4">{formData.description || "No description provided."}</p>
                   <div className="flex flex-wrap gap-2">
