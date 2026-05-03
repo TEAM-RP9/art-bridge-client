@@ -129,7 +129,7 @@ export default function HomePage() {
 
   useEffect(() => {
     listArtworks({ status: "published", size: 6 })
-      .then((r) => setArtworks(r.content))
+      .then((r) => setArtworks(r?.content ?? []))
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
