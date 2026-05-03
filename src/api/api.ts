@@ -143,9 +143,11 @@ async function request<T>(
   body?: unknown,
   opts?: RequestOptions,
   isRetry = false,
+  isCsrfRetry = false,
 ): Promise<T> {
   const url = buildUrl(path);
   const headers = buildHeaders(method, body);
+  const sentCsrfToken = headers['X-XSRF-TOKEN'];
 
 
   let response: Response;
@@ -170,6 +172,20 @@ async function request<T>(
   // Handle 401
   if (response.status === 401 && !isRetry && !opts?.skipAuthRefresh && authInterceptor) {
     return handle401<T>(method, path, body, opts, isRetry, response);
+  }
+
+  // Handle 403 caused by Spring Security 7 single-use CSRF rotation: the
+  // response that 403s also mints a fresh XSRF-TOKEN cookie. Retry once with
+  // the new token before surfacing the error.
+  if (
+    response.status === 403 &&
+    !isCsrfRetry &&
+    MUTATING_METHODS.has(method)
+  ) {
+    const freshCsrfToken = getCookie('XSRF-TOKEN');
+    if (freshCsrfToken && freshCsrfToken !== sentCsrfToken) {
+      return request<T>(method, path, body, opts, isRetry, true);
+    }
   }
 
   if (response.status === 204) {
