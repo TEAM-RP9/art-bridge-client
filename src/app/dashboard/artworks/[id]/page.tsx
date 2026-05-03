@@ -35,7 +35,7 @@ export default function ArtworkDetailPage({ params }: Readonly<ArtworkDetailPage
       })
       .finally(() => { if (!cancelled) setIsLoading(false); });
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, router]);
 
   if (notFoundError) notFound();
 

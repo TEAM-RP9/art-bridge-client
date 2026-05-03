@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Button, FormField, Input, Textarea } from "@/components/ui";
+import { useAuth } from "@/auth";
 import { listArtworks, updateArtwork } from "@/api";
 import type { ArtworkResponse } from "@/api";
 
@@ -14,10 +15,10 @@ interface ArtistProfile {
 }
 
 const DEFAULT_PROFILE: ArtistProfile = {
-  name: "Mari Tamm",
-  bio: "Artist based in Tallinn. My work explores colour, form and silence through painting and mixed media.",
+  name: "Sofia Anderson",
+  bio: "Contemporary artist exploring themes of nature, identity, and memory through expressive figurative work.",
   location: "Tallinn, Estonia",
-  website: "",
+  website: "https://sofia.art",
 };
 
 function moveItem<T>(arr: T[], from: number, to: number): T[] {
@@ -89,7 +90,6 @@ function PortfolioPreview({
           return (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {Array.from({length: 6}).map((_, i) => (
-                // eslint-disable-next-line react/no-array-index-key
                 <div key={`sk-${i}`} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
               ))}
             </div>
@@ -263,7 +263,6 @@ function PortfolioEdit({
             return (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 {Array.from({length: 4}).map((_, i) => (
-                  // eslint-disable-next-line react/no-array-index-key
                   <div key={`sk-${i}`} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
                 ))}
               </div>
@@ -438,6 +437,7 @@ function PortfolioCard({
 type Tab = "preview" | "edit";
 
 export default function PortfolioPage() {
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("preview");
   const [profile, setProfile] = useState<ArtistProfile>(DEFAULT_PROFILE);
 
@@ -486,17 +486,15 @@ export default function PortfolioPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">My Portfolio</h1>
-        <Link
-          href="/artist/demo"
-          target="_blank"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Open public profile
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6m0 0v6m0-6L10 14" />
-          </svg>
+        <Link href={`/artist/${user?.userId}`} target="_blank">
+          <Button variant="outline" size="sm" className="gap-1.5">
+            Open public profile
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6m0 0v6m0-6L10 14" />
+            </svg>
+          </Button>
         </Link>
       </div>
 
