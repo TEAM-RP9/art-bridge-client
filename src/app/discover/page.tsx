@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -267,7 +267,7 @@ function ArtistCard({ artist }: Readonly<{ artist: PublicArtist }>) {
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-export default function DiscoverPage() {
+function DiscoverContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams?.get("tab") === "artists" ? "artists" : "artworks";
   const [view, setView] = useState<"artworks" | "artists">(initialTab);
@@ -294,7 +294,7 @@ export default function DiscoverPage() {
       if (year === "older") {
         items = items.filter((a) => a.year !== null && a.year < 2021);
       } else {
-        items = items.filter((a) => a.year === parseInt(year, 10));
+        items = items.filter((a) => a.year === Number.parseInt(year, 10));
       }
     }
 
@@ -418,7 +418,7 @@ export default function DiscoverPage() {
 
               <div className="mt-3 space-y-4">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-foreground">Category</label>
+                  <label htmlFor="category-select" className="mb-1.5 block text-xs font-medium text-foreground">Category</label>
                   <div className="relative">
                     <select
                       value={category}
@@ -434,7 +434,7 @@ export default function DiscoverPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-foreground">Year</label>
+                  <label htmlFor="year-select" className="mb-1.5 block text-xs font-medium text-foreground">Year</label>
                   <div className="relative">
                     <select
                       value={year}
@@ -497,5 +497,13 @@ export default function DiscoverPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense>
+      <DiscoverContent />
+    </Suspense>
   );
 }
