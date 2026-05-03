@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/common";
+import { get } from "@/api";
 import { MOCK_DISCOVER_ARTWORKS } from "@/app/discover/page";
 import type { PublicArtwork } from "@/app/discover/page";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -22,7 +25,7 @@ interface ArtistPageProps {
   readonly params: Promise<{ id: string }>;
 }
 
-// ── Mock artist profiles (replace with GET /artists/:id when backend ready) ───
+// ── Mock data (used when NEXT_PUBLIC_USE_MOCK=true) ───────────────────────────
 
 const MOCK_ARTISTS: Record<string, Omit<ArtistData, "id">> = {
   "1": {
@@ -142,17 +145,92 @@ function EmptyArtworks({ category }: Readonly<{ category: string }>) {
   );
 }
 
+function PageSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <PublicNav />
+      <div className="border-b border-border bg-card">
+        <div className="mx-auto max-w-5xl px-4 py-10 animate-pulse">
+          <div className="flex gap-6">
+            <div className="h-24 w-24 shrink-0 rounded-full bg-muted" />
+            <div className="flex-1 space-y-3 pt-2">
+              <div className="h-7 w-48 rounded bg-muted" />
+              <div className="h-4 w-32 rounded bg-muted" />
+              <div className="h-4 w-80 rounded bg-muted" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse overflow-hidden rounded-xl border border-border bg-card">
+              <div className="aspect-[4/3] bg-muted" />
+              <div className="space-y-2 p-4">
+                <div className="h-4 w-3/4 rounded bg-muted" />
+                <div className="h-3 w-1/2 rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ArtistPage({ params }: ArtistPageProps) {
   const { id } = use(params);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [artist, setArtist] = useState<ArtistData | null>(null);
+  const [artworks, setArtworks] = useState<PublicArtwork[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [notFoundError, setNotFoundError] = useState(false);
 
-  const rawArtist = MOCK_ARTISTS[id];
-  if (!rawArtist) return notFound();
-  const artist: ArtistData = { id, ...rawArtist };
+  useEffect(() => {
+    let cancelled = false;
 
-  const artworks = MOCK_DISCOVER_ARTWORKS.filter((a) => a.artist.id === id);
+    if (USE_MOCK) {
+      const raw = MOCK_ARTISTS[id];
+      if (!raw) {
+        setNotFoundError(true);
+        setIsLoading(false);
+        return;
+      }
+      if (!cancelled) {
+        setArtist({ id, ...raw });
+        setArtworks(MOCK_DISCOVER_ARTWORKS.filter((a) => a.artist.id === id));
+        setIsLoading(false);
+      }
+      return () => { cancelled = true; };
+    }
+
+    // Real API: replace MOCK_ARTISTS/MOCK_DISCOVER_ARTWORKS with live endpoints
+    Promise.all([
+      get<ArtistData>(`/artists/${id}`),
+      get<PublicArtwork[]>(`/artists/${id}/artworks`),
+    ])
+      .then(([artistData, artworksData]) => {
+        if (!cancelled) {
+          setArtist(artistData);
+          setArtworks(artworksData ?? []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setNotFoundError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (notFoundError) notFound();
+  if (isLoading) return <PageSkeleton />;
+  if (!artist) return null;
+
   const categories = [
     "all",
     ...Array.from(new Set(artworks.map((a) => a.category).filter(Boolean))),

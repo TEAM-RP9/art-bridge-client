@@ -39,9 +39,9 @@ export default function ArtworksPage() {
           page,
         });
         setArtworks((prev) =>
-          append ? [...prev, ...result.content] : result.content
+          append ? [...prev, ...(result?.content ?? [])] : (result?.content ?? [])
         );
-        setTotalPages(result.totalPages);
+        setTotalPages(result?.totalPages ?? 1);
         setCurrentPage(page);
       } catch {
         setError("Failed to load artworks. Please try again.");

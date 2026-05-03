@@ -450,8 +450,9 @@ export default function PortfolioPage() {
     setIsLoading(true);
     try {
       const result = await listArtworks({ size: 100 });
-      setVisible(result.content.filter((a) => a.showOnProfile));
-      setHidden(result.content.filter((a) => !a.showOnProfile));
+      const content = result?.content ?? [];
+      setVisible(content.filter((a) => a.showOnProfile));
+      setHidden(content.filter((a) => !a.showOnProfile));
     } finally {
       setIsLoading(false);
     }
