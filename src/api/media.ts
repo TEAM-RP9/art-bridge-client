@@ -2,6 +2,7 @@ import { getCookie, ApiError, type ProblemDetail, type RequestOptions } from './
 import { refreshSession } from './auth';
 
 export interface MediaUploadResponse {
+  id: number;
   url: string;
 }
 
