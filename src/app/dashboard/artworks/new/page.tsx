@@ -12,7 +12,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import type { StepperStep } from "@/components/ui";
-import { createArtwork, uploadArtworkImage, ApiError } from "@/api";
+import { createArtwork, uploadMedia, normalizeMediaUrl, ApiError } from "@/api";
 import type { CreateArtworkRequest } from "@/api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -117,10 +117,11 @@ function AiBadge() {
   );
 }
 
-function Step1Upload({ imagePreviewUrl, aiState, uploadError, onFileSelect, onRemove }: Readonly<{
+function Step1Upload({ imagePreviewUrl, aiState, uploadError, uploadStatus, onFileSelect, onRemove }: Readonly<{
   imagePreviewUrl: string | null;
   aiState: "idle" | "analyzing" | "done";
   uploadError: string | null;
+  uploadStatus: "idle" | "uploading" | "uploaded" | "error";
   onFileSelect: (file: File) => void;
   onRemove: () => void;
 }>) {
@@ -136,6 +137,18 @@ function Step1Upload({ imagePreviewUrl, aiState, uploadError, onFileSelect, onRe
         <FileUpload accept="image/jpeg,image/png,image/webp" maxSizeMb={15} onChange={onFileSelect} onError={() => {}} />
       )}
       {uploadError && <p className="text-sm text-destructive" role="alert">{uploadError}</p>}
+
+      {uploadStatus === "uploading" && (
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
+          <svg className="h-4 w-4 animate-spin text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Uploading image...</span>
+          </p>
+        </div>
+      )}
 
       {aiState === "analyzing" && (
         <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-3">
@@ -380,21 +393,42 @@ export default function NewArtworkPage() {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof ArtworkFormData, string>>>({});
   const [tagInput, setTagInput] = useState("");
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set());
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "uploaded" | "error">("idle");
+  const [mediaId, setMediaId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const uploadIdRef = useRef(0);
+  const uploadAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); }, []);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback(async (file: File) => {
     setUploadError(null);
     setImageFile(file);
-    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-    setImagePreviewUrl(URL.createObjectURL(file));
+
+    // revoke previous blob URL safely
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+
+    const newBlobUrl = URL.createObjectURL(file);
+    setBlobUrl(newBlobUrl);
+    setImagePreviewUrl(newBlobUrl);
+
+    setUploadStatus("uploading");
+    setMediaId(null);
+
     setAiState("analyzing");
+
+    const currentUploadId = ++uploadIdRef.current;
+    uploadAbortRef.current?.abort();
+    const controller = new AbortController();
+    uploadAbortRef.current = controller;
+
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     aiTimerRef.current = setTimeout(() => {
       const meta = extractAiMetadata(file);
       const filled = new Set<string>();
+
       setFormData((prev) => {
         const next = { ...prev };
         if (!prev.title && meta.title) { next.title = meta.title; filled.add("title"); }
@@ -403,18 +437,55 @@ export default function NewArtworkPage() {
         if (prev.tags.length === 0 && meta.tags?.length) { next.tags = meta.tags; filled.add("tags"); }
         return next;
       });
+
       setAiFilledFields(filled);
       setAiState("done");
     }, 1800);
-  }, [imagePreviewUrl]);
+
+    try {
+      const result = await uploadMedia(file, { signal: controller.signal });
+
+      // ignore stale uploads
+      if (uploadIdRef.current !== currentUploadId) return;
+
+      setMediaId(result.id);
+
+      // revoke blob after success
+      if (newBlobUrl) URL.revokeObjectURL(newBlobUrl);
+      setBlobUrl(null);
+
+      setImagePreviewUrl(normalizeMediaUrl(result.url));
+      setUploadStatus("uploaded");
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      if (uploadIdRef.current !== currentUploadId) return;
+
+      setUploadStatus("error");
+      setUploadError(
+          err instanceof ApiError
+              ? (err.detail ?? err.title ?? "Upload failed")
+              : "Upload failed. Please try again."
+      );
+    }
+  }, [blobUrl]);
 
   const handleRemoveImage = useCallback(() => {
-    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    // cancel in-flight upload
+    uploadIdRef.current++;
+    uploadAbortRef.current?.abort();
+
+    // revoke only blob URLs
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+
     setImageFile(null);
     setImagePreviewUrl(null);
     setAiState("idle");
+    setUploadStatus("idle");
+    setMediaId(null);
+    setBlobUrl(null);
+
     if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
-  }, [imagePreviewUrl]);
+  }, [blobUrl]);
 
   const handleFormChange = (patch: Partial<ArtworkFormData>) => setFormData((p) => ({ ...p, ...patch }));
 
@@ -431,7 +502,11 @@ export default function NewArtworkPage() {
   const handleRemoveTag = (tag: string) => setFormData((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }));
 
   const handleNext = () => {
-    if (currentStep === 0 && !imageFile) { setUploadError("Please select an image to upload"); return; }
+    if (currentStep === 0) {
+      if (!imageFile) { setUploadError("Please select an image to upload"); return; }
+      if (uploadStatus === "uploading") { setUploadError("Please wait for the upload to complete"); return; }
+      if (uploadStatus !== "uploaded") { setUploadError("Upload failed. Please try a different image."); return; }
+    }
     if (currentStep === 1) {
       const errors = validateDetails(formData);
       setFormErrors(errors);
@@ -441,7 +516,7 @@ export default function NewArtworkPage() {
   };
 
   const handleSubmit = async () => {
-    if (!imageFile) return;
+    if (!mediaId) return;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -457,9 +532,9 @@ export default function NewArtworkPage() {
         tags: formData.tags,
         status: formData.status,
         showOnProfile: formData.showOnProfile,
+        mediaId,
       };
-      const artwork = await createArtwork(payload);
-      await uploadArtworkImage(artwork.id, imageFile);
+      await createArtwork(payload);
       router.push("/dashboard/artworks");
     } catch (err) {
       setSubmitError(err instanceof ApiError ? (err.detail ?? err.title ?? "Failed to save artwork") : "Something went wrong. Please try again.");
@@ -482,6 +557,7 @@ export default function NewArtworkPage() {
           imagePreviewUrl={imagePreviewUrl}
           aiState={aiState}
           uploadError={uploadError}
+          uploadStatus={uploadStatus}
           onFileSelect={handleFileSelect}
           onRemove={handleRemoveImage}
         />
@@ -515,8 +591,8 @@ export default function NewArtworkPage() {
         </Button>
 
         {currentStep < 2 ? (
-          <Button type="button" onClick={handleNext} disabled={currentStep === 0 && aiState === "analyzing"}>
-            {currentStep === 0 && aiState === "analyzing" ? "AI analyzing..." : "Continue →"}
+          <Button type="button" onClick={handleNext} disabled={currentStep === 0 && (uploadStatus === "uploading" || aiState === "analyzing")}>
+            {currentStep === 0 && uploadStatus === "uploading" ? "Uploading..." : currentStep === 0 && aiState === "analyzing" ? "AI analyzing..." : "Continue →"}
           </Button>
         ) : (
           <Button type="button" onClick={handleSubmit} isLoading={isSubmitting}>
