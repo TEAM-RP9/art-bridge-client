@@ -158,7 +158,7 @@ export default function ArtistPage({ params }: ArtistPageProps) {
     async function load() {
       try {
         const result = await listArtworks({ status: "published", size: 50 });
-        if (!cancelled) setArtworks(result.content);
+        if (!cancelled) setArtworks(result?.content ?? []);
       } catch (err) {
         if (!cancelled && err instanceof ApiError && err.status === 404) {
           setNotFoundError(true);
