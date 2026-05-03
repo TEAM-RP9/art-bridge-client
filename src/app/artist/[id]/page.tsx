@@ -2,7 +2,7 @@
 
 import { useState, use, useEffect } from "react";
 import { notFound } from "next/navigation";
-import { listArtworks, ApiError } from "@/api";
+import { listArtistArtworks, ApiError } from "@/api";
 import type { ArtworkResponse } from "@/api";
 import { PublicNav } from "@/components/common";
 
@@ -157,7 +157,7 @@ export default function ArtistPage({ params }: ArtistPageProps) {
     let cancelled = false;
     async function load() {
       try {
-        const result = await listArtworks({ status: "published", size: 50 });
+        const result = await listArtistArtworks(id, { size: 50 });
         if (!cancelled) setArtworks(result?.content ?? []);
       } catch (err) {
         if (!cancelled && err instanceof ApiError && err.status === 404) {

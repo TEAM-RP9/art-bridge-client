@@ -67,6 +67,10 @@ export interface ArtworkFilters {
   search?: string;
 }
 
+export interface PublicArtworkFilters {
+  size?: number;
+}
+
 // ── Mock data (used when NEXT_PUBLIC_USE_MOCK=true) ──────────────────────────
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
@@ -259,4 +263,16 @@ export const deleteArtwork = (id: string, opts?: RequestOptions): Promise<void> 
     return mockDelay(undefined);
   }
   return del<void>(`/artworks/${id}`, opts);
+};
+
+export const listArtistArtworks = (
+  artistId: string,
+  filters: PublicArtworkFilters = {},
+  opts?: RequestOptions
+): Promise<ArtworkListResponse> => {
+  const params = new URLSearchParams();
+  if (filters.size !== undefined) params.set("size", String(filters.size));
+  const qs = params.toString();
+  const url = `/artists/${artistId}/artworks` + (qs ? "?" + qs : "");
+  return get<ArtworkListResponse>(url, opts);
 };

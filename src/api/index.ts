@@ -12,6 +12,7 @@ export {
   createArtwork,
   deleteArtwork,
   getArtwork,
+  listArtistArtworks,
   listArtworks,
   updateArtwork,
 } from './artworks';
@@ -23,6 +24,7 @@ export type {
   ArtworkStatus,
   CreateArtworkRequest,
   DimensionUnit,
+  PublicArtworkFilters,
   UpdateArtworkRequest,
 } from './artworks';
 
