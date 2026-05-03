@@ -2,10 +2,12 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/common";
-import { MOCK_DISCOVER_ARTWORKS, CATEGORY_LABELS } from "../page";
+import { MOCK_DISCOVER_ARTWORKS } from "../page";
 import type { PublicArtwork } from "../page";
+import { CATEGORY_LABELS } from "@/lib/constants";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -80,13 +82,13 @@ function SmallArtworkCard({ artwork }: Readonly<{ artwork: PublicArtwork }>) {
       href={`/discover/${artwork.id}`}
       className="group block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
     >
-      <div className="aspect-[4/3] overflow-hidden bg-muted">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image.url}
             alt={artwork.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -161,10 +163,11 @@ export default function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
           {/* Image */}
           <div className="overflow-hidden rounded-2xl border border-border bg-muted">
             {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={image.url}
                 alt={artwork.title}
+                width={image.width}
+                height={image.height}
                 className="h-full max-h-[600px] w-full object-contain"
               />
             ) : (
@@ -310,11 +313,12 @@ export default function ArtworkDetailPage({ params }: ArtworkDetailPageProps) {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   {artwork.artist.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={artwork.artist.avatarUrl}
                       alt={artwork.artist.name}
-                      className="h-10 w-10 shrink-0 rounded-full object-cover"
+                      width={40}
+                      height={40}
+                      className="shrink-0 rounded-full object-cover"
                     />
                   ) : (
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground">

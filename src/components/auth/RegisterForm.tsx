@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, FormField, Input } from "@/components/ui";
 
 function getPasswordStrength(pw: string): string {
@@ -19,12 +18,12 @@ interface RegisterFormProps {
   onSubmit: (data: { email: string; password: string; confirmPassword: string }) => void;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({
+export const RegisterForm = ({
   isLoading = false,
   error,
   fieldErrors,
   onSubmit,
-}) => {
+}: RegisterFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,13 +34,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   } | null>(null);
   const [passwordStrength, setPasswordStrength] = useState<string>("");
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: { target: { value: string } }) => {
     const val = e.target.value;
     setPassword(val);
     setPasswordStrength(getPasswordStrength(val));
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     setValidationErrors(null);
     const errors: { email?: string; password?: string; confirmPassword?: string } = {};
@@ -79,12 +78,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const passwordError = validationErrors?.password ?? fieldErrors?.password;
   const confirmPasswordError = validationErrors?.confirmPassword ?? fieldErrors?.confirmPassword;
 
-  const strengthColor =
-    passwordStrength === "Strong"
-      ? "text-green-600"
-      : passwordStrength
-      ? "text-yellow-600"
-      : "text-muted-foreground";
+  let strengthColor = "text-muted-foreground";
+  if (passwordStrength === "Strong") strengthColor = "text-green-600";
+  else if (passwordStrength) strengthColor = "text-yellow-600";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

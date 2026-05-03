@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface ProfileDetailsViewProps {
   user: {
     email: string;
@@ -8,7 +6,7 @@ export interface ProfileDetailsViewProps {
   };
 }
 
-const ProfileDetailsView: React.FC<ProfileDetailsViewProps> = ({ user }) => (
+const ProfileDetailsView = ({ user }: ProfileDetailsViewProps) => (
   <div className="space-y-3">
     <div>
       <span className="block text-xs text-blue-200">Email</span>

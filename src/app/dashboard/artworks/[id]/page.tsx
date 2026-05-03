@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Badge, Button } from "@/components/ui";
@@ -93,13 +94,13 @@ export default function ArtworkDetailPage({ params }: Readonly<ArtworkDetailPage
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Image */}
-        <div className="overflow-hidden rounded-xl border border-border bg-muted">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted">
           {primaryImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={primaryImage.url}
               alt={artwork.title}
-              className="aspect-[4/3] w-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <div className="flex aspect-[4/3] items-center justify-center text-muted-foreground">

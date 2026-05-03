@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { PublicNav } from "@/components/common";
 import type { ArtworkResponse } from "@/api";
+import { CATEGORY_LABELS } from "@/lib/constants";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -21,17 +24,6 @@ export interface PublicArtwork extends ArtworkResponse {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────────
-
-export const CATEGORY_LABELS: Record<string, string> = {
-  painting: "Painting",
-  drawing: "Drawing",
-  sculpture: "Sculpture",
-  photography: "Photography",
-  printmaking: "Printmaking",
-  digital: "Digital",
-  "mixed-media": "Mixed Media",
-  other: "Other",
-};
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
@@ -214,11 +206,11 @@ function ArtworkCard({ artwork }: Readonly<{ artwork: PublicArtwork }>) {
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image.url}
             alt={artwork.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -254,8 +246,7 @@ function ArtistCard({ artist }: Readonly<{ artist: PublicArtist }>) {
     >
       <div className="flex items-center gap-4">
         {artist.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={artist.avatarUrl} alt={artist.name} className="h-14 w-14 shrink-0 rounded-full object-cover" />
+          <Image src={artist.avatarUrl} alt={artist.name} width={56} height={56} className="shrink-0 rounded-full object-cover" />
         ) : (
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
             {artist.name.charAt(0)}
@@ -277,7 +268,9 @@ function ArtistCard({ artist }: Readonly<{ artist: PublicArtist }>) {
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function DiscoverPage() {
-  const [view, setView] = useState<"artworks" | "artists">("artworks");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams?.get("tab") === "artists" ? "artists" : "artworks";
+  const [view, setView] = useState<"artworks" | "artists">(initialTab);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "popular">("recent");
   const [category, setCategory] = useState("all");

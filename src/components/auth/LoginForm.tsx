@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, FormField, Input } from "@/components/ui";
 
 interface LoginFormProps {
@@ -9,18 +9,18 @@ interface LoginFormProps {
   onSubmit: (data: { email: string; password: string }) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({
+export const LoginForm = ({
   isLoading = false,
   error,
   fieldErrors,
   initialEmail = "",
   onSubmit,
-}) => {
+}: LoginFormProps) => {
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string } | null>(null);
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     setValidationErrors(null);
     const errors: { email?: string; password?: string } = {};

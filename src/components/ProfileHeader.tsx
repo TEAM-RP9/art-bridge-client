@@ -1,4 +1,4 @@
-import React from 'react';
+import Image from 'next/image';
 
 interface ProfileHeaderProps {
   name: string;
@@ -8,10 +8,9 @@ interface ProfileHeaderProps {
 }
 
 // Placeholder UserAvatar component
-const UserAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avatarUrl }) => {
+const UserAvatar = ({ name, avatarUrl }: { name: string; avatarUrl?: string }) => {
   if (avatarUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={avatarUrl} alt={name} className="user-avatar" style={{ width: 64, height: 64, borderRadius: '50%' }} />;
+    return <Image src={avatarUrl} alt={name} width={64} height={64} className="user-avatar" style={{ borderRadius: '50%' }} />;
   }
   // Initials fallback
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -22,7 +21,7 @@ const UserAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avat
   );
 };
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, role, avatarUrl, status }) => {
+const ProfileHeader = ({ name, role, avatarUrl, status }: ProfileHeaderProps) => {
   return (
     <div className="profile-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <UserAvatar name={name} avatarUrl={avatarUrl} />

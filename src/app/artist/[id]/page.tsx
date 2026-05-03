@@ -2,6 +2,7 @@
 
 import { useState, use, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PublicNav } from "@/components/common";
 import { get } from "@/api";
@@ -56,11 +57,12 @@ const MOCK_ARTISTS: Record<string, Omit<ArtistData, "id">> = {
 function ArtistAvatar({ artist }: Readonly<{ artist: ArtistData }>) {
   if (artist.avatarUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={artist.avatarUrl}
         alt={artist.name}
-        className="h-24 w-24 shrink-0 rounded-full object-cover ring-4 ring-background shadow-lg"
+        width={96}
+        height={96}
+        className="shrink-0 rounded-full object-cover ring-4 ring-background shadow-lg"
       />
     );
   }
@@ -89,11 +91,11 @@ function PublicArtworkCard({ artwork }: Readonly<{ artwork: PublicArtwork }>) {
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image.url}
             alt={artwork.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -193,16 +195,16 @@ export default function ArtistPage({ params }: ArtistPageProps) {
 
     if (USE_MOCK) {
       const raw = MOCK_ARTISTS[id];
-      if (!raw) {
-        setNotFoundError(true);
+      Promise.resolve().then(() => {
+        if (cancelled) return;
+        if (!raw) {
+          setNotFoundError(true);
+        } else {
+          setArtist({ id, ...raw });
+          setArtworks(MOCK_DISCOVER_ARTWORKS.filter((a) => a.artist.id === id));
+        }
         setIsLoading(false);
-        return;
-      }
-      if (!cancelled) {
-        setArtist({ id, ...raw });
-        setArtworks(MOCK_DISCOVER_ARTWORKS.filter((a) => a.artist.id === id));
-        setIsLoading(false);
-      }
+      });
       return () => { cancelled = true; };
     }
 
