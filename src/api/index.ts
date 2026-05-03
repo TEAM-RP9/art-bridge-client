@@ -14,7 +14,6 @@ export {
   getArtwork,
   listArtworks,
   updateArtwork,
-  uploadArtworkImage,
 } from './artworks';
 export type {
   ArtworkFilters,
@@ -25,7 +24,6 @@ export type {
   CreateArtworkRequest,
   DimensionUnit,
   UpdateArtworkRequest,
-  UploadImageResponse,
 } from './artworks';
 
 export { normalizeMediaUrl, uploadMedia } from './media';

@@ -54,6 +54,7 @@ export interface CreateArtworkRequest {
   tags?: string[];
   status: ArtworkStatus;
   showOnProfile: boolean;
+  mediaId: number;
 }
 
 export type UpdateArtworkRequest = Partial<CreateArtworkRequest>;
@@ -64,13 +65,6 @@ export interface ArtworkFilters {
   status?: ArtworkStatus;
   category?: string;
   search?: string;
-}
-
-export interface UploadImageResponse {
-  imageId: string;
-  url: string;
-  width: number;
-  height: number;
 }
 
 // ── Mock data (used when NEXT_PUBLIC_USE_MOCK=true) ──────────────────────────
@@ -233,7 +227,7 @@ export const createArtwork = (
       tags: data.tags ?? [],
       status: data.status,
       showOnProfile: data.showOnProfile,
-      images: [],
+      images: data.mediaId ? [{ id: `img${Date.now()}`, url: `https://placeholder.mock/media/${data.mediaId}`, width: 800, height: 600, isPrimary: true }] : [],
       viewCount: 0,
       likeCount: 0,
       createdAt: new Date().toISOString(),
@@ -266,45 +260,3 @@ export const deleteArtwork = (id: string, opts?: RequestOptions): Promise<void> 
   }
   return del<void>(`/artworks/${id}`, opts);
 };
-
-export async function uploadArtworkImage(
-  artworkId: string,
-  file: File,
-  signal?: AbortSignal
-): Promise<UploadImageResponse> {
-  if (USE_MOCK) {
-    const objectUrl = URL.createObjectURL(file);
-    const fakeImage: ArtworkImage = {
-      id: `img${Date.now()}`,
-      url: objectUrl,
-      width: 800,
-      height: 600,
-      isPrimary: true,
-    };
-    const idx = mockStore.findIndex((a) => a.id === artworkId);
-    if (idx !== -1) mockStore[idx].images = [fakeImage];
-    return mockDelay({
-      imageId: fakeImage.id,
-      url: objectUrl,
-      width: 800,
-      height: 600,
-    });
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
-  const response = await fetch(`${base}/artworks/${artworkId}/images`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-    signal,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Upload failed: ${response.statusText}`);
-  }
-
-  return response.json() as Promise<UploadImageResponse>;
-}
