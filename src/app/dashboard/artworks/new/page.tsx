@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Stepper,
@@ -311,9 +312,8 @@ function Step3Publish({ imagePreviewUrl, formData, submitError, onFormChange }: 
       <h2 className="text-lg font-semibold">Review & Publish</h2>
 
       {imagePreviewUrl && (
-        <div className="overflow-hidden rounded-xl border border-border">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imagePreviewUrl} alt="Artwork preview" className="aspect-[4/3] w-full object-cover" />
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border">
+          <Image src={imagePreviewUrl} alt="Artwork preview" fill unoptimized className="object-cover" />
           <div className="p-4 space-y-2">
             <h3 className="font-semibold">{formData.title}</h3>
             {formData.medium && <p className="text-sm text-muted-foreground">{formData.medium}{formData.yearStr ? ` · ${formData.yearStr}` : ""}</p>}

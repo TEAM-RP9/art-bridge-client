@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { UserProfileData } from "./UserProfileView";
 
 interface UserProfileEditProps {
@@ -8,14 +8,14 @@ interface UserProfileEditProps {
   onCancel: () => void;
 }
 
-const UserProfileEdit: React.FC<UserProfileEditProps> = ({ data, isLoading = false, onSave, onCancel }) => {
+const UserProfileEdit = ({ data, isLoading = false, onSave, onCancel }: UserProfileEditProps) => {
   const [form, setForm] = useState<UserProfileData>(data);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: { target: { name: string; value: string } }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     onSave(form);
   };

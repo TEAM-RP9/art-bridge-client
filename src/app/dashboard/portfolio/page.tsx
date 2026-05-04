@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button, FormField, Input, Textarea } from "@/components/ui";
+import { useAuth } from "@/auth";
 import { listArtworks, updateArtwork } from "@/api";
 import type { ArtworkResponse } from "@/api";
 
@@ -14,10 +16,10 @@ interface ArtistProfile {
 }
 
 const DEFAULT_PROFILE: ArtistProfile = {
-  name: "Mari Tamm",
-  bio: "Artist based in Tallinn. My work explores colour, form and silence through painting and mixed media.",
+  name: "Sofia Anderson",
+  bio: "Contemporary artist exploring themes of nature, identity, and memory through expressive figurative work.",
   location: "Tallinn, Estonia",
-  website: "",
+  website: "https://sofia.art",
 };
 
 function moveItem<T>(arr: T[], from: number, to: number): T[] {
@@ -38,108 +40,164 @@ function PortfolioPreview({
   artworks: ArtworkResponse[];
   isLoading: boolean;
 }>) {
+  const [activeCategory, setActiveCategory] = useState("all");
+
   const initials = profile.name
     .split(" ")
     .map((n) => n[0]?.toUpperCase() ?? "")
     .join("")
     .slice(0, 2);
 
+  const categories = [
+    "all",
+    ...Array.from(new Set(artworks.map((a) => a.category).filter(Boolean))),
+  ];
+
+  const filtered =
+    activeCategory === "all"
+      ? artworks
+      : artworks.filter((a) => a.category === activeCategory);
+
+  const totalViews = artworks.reduce((sum, a) => sum + a.viewCount, 0);
+  const totalLikes = artworks.reduce((sum, a) => sum + a.likeCount, 0);
+
   return (
-    <div className="mx-auto max-w-3xl">
-      {/* Artist header */}
-      <div className="mb-10 flex flex-col items-center text-center sm:flex-row sm:items-start sm:text-left sm:gap-6">
-        <div className="mb-4 sm:mb-0 flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-foreground">
-          {initials}
-        </div>
-        <div>
-          <h2 className="text-2xl font-semibold">{profile.name}</h2>
-          {profile.location && (
-            <p className="mt-1 flex items-center justify-center gap-1 text-sm text-muted-foreground sm:justify-start">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {profile.location}
-            </p>
-          )}
-          {profile.bio && (
-            <p className="mt-3 max-w-prose text-sm leading-relaxed text-foreground">
-              {profile.bio}
-            </p>
-          )}
-          {profile.website && (
-            <a href={profile.website} target="_blank" rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline">
-              {profile.website.replace(/^https?:\/\//, "")}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round"
-                  d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          )}
+    <div className="-mx-6 -mt-10 rounded-xl overflow-hidden border border-border bg-background">
+      {/* Artist hero — mirrors public artist page */}
+      <div className="border-b border-border bg-card">
+        <div className="px-6 py-10">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-foreground ring-4 ring-background shadow-lg">
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
+              {profile.location && (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 shrink-0" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {profile.location}
+                </p>
+              )}
+              {profile.bio && (
+                <p className="mt-2 max-w-lg text-sm text-foreground">{profile.bio}</p>
+              )}
+              <div className="mt-4 flex flex-wrap items-center gap-6">
+                <div>
+                  <p className="text-base font-semibold text-foreground">{artworks.length}</p>
+                  <p className="text-xs text-muted-foreground">Works</p>
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-foreground">{totalViews.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Total views</p>
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-foreground">{totalLikes.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Total likes</p>
+                </div>
+                {profile.website && (
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-primary hover:underline">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    {profile.website.replace(/^https?:\/\//, "")}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Artwork grid */}
-      {(() => {
-        if (isLoading) {
-          return (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {Array.from({length: 6}).map((_, i) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <div key={`sk-${i}`} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
+      {/* Category filter */}
+      {!isLoading && categories.length > 1 && (
+        <div className="border-b border-border bg-background">
+          <div className="px-6">
+            <div className="flex gap-2 overflow-x-auto py-3 [&::-webkit-scrollbar]:hidden">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveCategory(cat)}
+                  className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors ${
+                    activeCategory === cat
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  }`}
+                >
+                  {cat === "all" ? "All works" : cat.replace("-", " ")}
+                </button>
               ))}
             </div>
-          );
-        }
-        if (artworks.length === 0) {
-          return (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 py-20 text-center">
-              <p className="text-sm text-muted-foreground">No artworks in portfolio yet.</p>
-              <p className="mt-1 text-xs text-muted-foreground">Switch to Edit to add artworks.</p>
-            </div>
-          );
-        }
-        return (
-          <div className="columns-2 gap-4 sm:columns-3">
-            {artworks.map((artwork) => {
-            const img = artwork.images.find((i) => i.isPrimary) ?? artwork.images[0];
-            return (
-              <div key={artwork.id} className="mb-4 break-inside-avoid overflow-hidden rounded-xl border border-border bg-card group">
-                <div className="overflow-hidden bg-muted">
-                  {img ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={img.url}
-                      alt={artwork.title}
-                      className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center text-muted-foreground">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="px-3 py-2.5">
-                  <p className="text-xs font-semibold text-card-foreground">{artwork.title}</p>
-                  {artwork.medium && (
-                    <p className="text-xs text-muted-foreground">{artwork.medium}</p>
-                  )}
+          </div>
+        </div>
+      )}
+
+      {/* Artwork grid */}
+      <div className="px-6 py-8">
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={`sk-${i}`} className="animate-pulse overflow-hidden rounded-xl border border-border bg-card">
+                <div className="aspect-[4/3] bg-muted" />
+                <div className="space-y-2 p-4">
+                  <div className="h-4 w-3/4 rounded bg-muted" />
+                  <div className="h-3 w-1/2 rounded bg-muted" />
                 </div>
               </div>
-            );
-          })}
+            ))}
           </div>
-        );
-      })()}
+        ) : filtered.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="font-medium text-foreground">No artworks yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">Switch to Edit to add artworks.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((artwork) => {
+              const img = artwork.images.find((i) => i.isPrimary) ?? artwork.images[0];
+              return (
+                <Link key={artwork.id} href={`/dashboard/artworks/${artwork.id}`} className="group block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    {img ? (
+                      <Image
+                        src={img.url}
+                        alt={artwork.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-muted-foreground">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="truncate text-sm font-semibold text-card-foreground">{artwork.title}</h3>
+                    {artwork.medium && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {artwork.medium}{artwork.year ? `, ${artwork.year}` : ""}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -263,7 +321,6 @@ function PortfolioEdit({
             return (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 {Array.from({length: 4}).map((_, i) => (
-                  // eslint-disable-next-line react/no-array-index-key
                   <div key={`sk-${i}`} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />
                 ))}
               </div>
@@ -361,11 +418,11 @@ function PortfolioCard({
       <Link href={`/dashboard/artworks/${artwork.id}`}>
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {primaryImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={primaryImage.url}
               alt={artwork.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -438,6 +495,7 @@ function PortfolioCard({
 type Tab = "preview" | "edit";
 
 export default function PortfolioPage() {
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("preview");
   const [profile, setProfile] = useState<ArtistProfile>(DEFAULT_PROFILE);
 
@@ -487,22 +545,20 @@ export default function PortfolioPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">My Portfolio</h1>
-        <Link
-          href="/artist/demo"
-          target="_blank"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Open public profile
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6m0 0v6m0-6L10 14" />
-          </svg>
+        <Link href={`/artist/${user?.userId}`} target="_blank">
+          <Button variant="outline" size="sm" className="gap-1.5">
+            Open public profile
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6m0 0v6m0-6L10 14" />
+            </svg>
+          </Button>
         </Link>
       </div>
 
       {/* Tab bar */}
-      <div className="mb-8 flex items-center gap-1 rounded-xl border border-border bg-muted/40 p-1 w-fit">
+      <div className="mb-16 flex items-center gap-1 rounded-xl border border-border bg-muted/40 p-1 w-fit">
         {(["preview", "edit"] as Tab[]).map((t) => (
           <button
             key={t}

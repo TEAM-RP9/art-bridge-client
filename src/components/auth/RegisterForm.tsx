@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, FormField, Input } from "@/components/ui";
 import type { RegisterableRole } from "@/api";
 import { cn } from "@/lib/utils";
@@ -42,7 +41,7 @@ const ROLE_OPTIONS: ReadonlyArray<{
   },
 ];
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({
+export const RegisterForm = ({
   isLoading = false,
   error,
   fieldErrors,
@@ -61,13 +60,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   } | null>(null);
   const [passwordStrength, setPasswordStrength] = useState<string>("");
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: { target: { value: string } }) => {
     const val = e.target.value;
     setPassword(val);
     setPasswordStrength(getPasswordStrength(val));
   };
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: { preventDefault(): void }) => {
     e.preventDefault();
     setValidationErrors(null);
     const errors: {
@@ -115,12 +114,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const confirmPasswordError = validationErrors?.confirmPassword ?? fieldErrors?.confirmPassword;
   const roleError = validationErrors?.role ?? fieldErrors?.role;
 
-  const strengthColor =
-    passwordStrength === "Strong"
-      ? "text-green-600"
-      : passwordStrength
-      ? "text-yellow-600"
-      : "text-muted-foreground";
+  let strengthColor = "text-muted-foreground";
+  if (passwordStrength === "Strong") strengthColor = "text-green-600";
+  else if (passwordStrength) strengthColor = "text-yellow-600";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

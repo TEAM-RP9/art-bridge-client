@@ -1,4 +1,4 @@
-import * as React from "react";
+import Image from "next/image";
 import { Heading } from "@/components/ui/Heading";
 import { Paragraph } from "@/components/ui/Paragraph";
 import { type ArtistProfile } from "@/types/artwork";
@@ -11,11 +11,12 @@ export function PortfolioHeader({ artist }: PortfolioHeaderProps) {
   return (
     <div className="flex items-center gap-5 pb-8">
       {artist.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={artist.avatarUrl}
           alt={artist.name}
-          className="h-20 w-20 rounded-full object-cover shrink-0"
+          width={80}
+          height={80}
+          className="rounded-full object-cover shrink-0"
         />
       ) : (
         <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-secondary text-2xl font-bold text-secondary-foreground">
