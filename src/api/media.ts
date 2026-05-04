@@ -39,6 +39,7 @@ async function uploadMediaInner(
   file: File,
   opts: RequestOptions | undefined,
   isRetry: boolean,
+  isCsrfRetry = false,
 ): Promise<MediaUploadResponse> {
   const base = getMediaBaseUrl();
   const url = `${base}/media/upload`;
@@ -84,6 +85,13 @@ async function uploadMediaInner(
       title: response.statusText,
       detail: 'Session expired',
     });
+  }
+
+  if (response.status === 403 && !isCsrfRetry) {
+    const freshCsrf = getCookie('XSRF-TOKEN');
+    if (freshCsrf && freshCsrf !== csrf) {
+      return uploadMediaInner(file, opts, isRetry, true);
+    }
   }
 
   const text = await response.text();

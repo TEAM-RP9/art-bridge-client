@@ -63,7 +63,7 @@ function FeaturedArtworkCard({ artwork }: Readonly<{ artwork: ArtworkResponse }>
         <h3 className="truncate text-sm font-semibold text-card-foreground">{artwork.title}</h3>
         {artwork.medium && (
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {artwork.medium}{artwork.year ? `, ${artwork.year}` : ""}
+            {artwork.medium}{artwork.creationYear ? `, ${artwork.creationYear}` : ""}
           </p>
         )}
         <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">

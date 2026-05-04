@@ -68,7 +68,7 @@ export function ArtworkCard({
         {artwork.medium && (
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {artwork.medium}
-            {artwork.year ? `, ${artwork.year}` : ""}
+            {artwork.creationYear ? `, ${artwork.creationYear}` : ""}
           </p>
         )}
         {artwork.status === "published" && (
