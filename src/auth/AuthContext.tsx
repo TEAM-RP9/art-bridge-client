@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import type { AuthResponse } from "@/api";
-import { getCurrentUser } from "@/api";
+import { ApiError, getCurrentUser, refreshSession } from "@/api";
 
 export interface AuthUser {
   userId: number;
@@ -36,10 +36,38 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   }, []);
 
   useEffect(() => {
-    getCurrentUser()
-      .then(signIn)
-      .catch(() => signOut())
-      .finally(() => setIsInitializing(false));
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function init() {
+      try {
+        const response = await getCurrentUser({ signal });
+        if (!signal.aborted) signIn(response);
+      } catch (err) {
+        if (signal.aborted) return;
+        if (err instanceof ApiError && err.status === 401) {
+          const refreshed = await refreshSession();
+          if (signal.aborted) return;
+          if (refreshed) {
+            try {
+              const response = await getCurrentUser({ signal });
+              if (!signal.aborted) signIn(response);
+            } catch {
+              if (!signal.aborted) signOut();
+            }
+          } else {
+            signOut();
+          }
+        } else {
+          signOut();
+        }
+      } finally {
+        if (!signal.aborted) setIsInitializing(false);
+      }
+    }
+
+    init();
+    return () => controller.abort();
   }, [signIn, signOut]);
 
   const value = useMemo(

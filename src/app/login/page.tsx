@@ -28,6 +28,12 @@ function LoginContent() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (auth.isAuthenticated === true) {
+      router.replace(next);
+    }
+  }, [auth.isAuthenticated, router, next]);
+
+  useEffect(() => {
     return () => {
       abortRef.current?.abort();
     };
