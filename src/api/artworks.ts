@@ -69,7 +69,7 @@ export interface ArtworkFilters {
 
 // ── Wire-format translation ──────────────────────────────────────────────────
 
-export const CATEGORY_TO_API: Record<string, string> = {
+const CATEGORY_TO_API: Record<string, string> = {
   painting: "PAINTING",
   drawing: "DRAWING",
   sculpture: "SCULPTURE",
@@ -106,6 +106,7 @@ const DIMENSION_UNIT_FROM_API: Record<string, DimensionUnit> = {
   M: "m",
 };
 
+// API sends UPPER_SNAKE_CASE enums at runtime; types don't reflect that, hence the casts.
 function fromApiArtwork(raw: ArtworkResponse): ArtworkResponse {
   const rawUnit = raw.dimensionUnit as unknown as string | null;
   return {
