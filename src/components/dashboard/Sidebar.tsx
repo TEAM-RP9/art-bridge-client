@@ -94,7 +94,7 @@ function NavItem({
   href: string; label: string; icon: React.ReactNode; soon?: boolean; collapsed?: boolean;
 }) {
   const pathname = usePathname();
-  const isActive = pathname === href || pathname.startsWith(href + "/");
+  const isActive = pathname === href || pathname?.startsWith(href + "/");
 
   if (soon) {
     return (
@@ -239,7 +239,7 @@ export function MobileNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center border-t border-border bg-card lg:hidden">
       {items.map((item) => {
         const isAdd = item.label === "Add";
-        const isActive = !isAdd && (pathname === item.href || pathname.startsWith(item.href + "/"));
+        const isActive = !isAdd && (pathname === item.href || pathname?.startsWith(item.href + "/"));
         return (
           <Link
             key={item.href}

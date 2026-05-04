@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export interface ImagePreviewProps
@@ -18,8 +20,6 @@ const ASPECT_CLASSES: Record<NonNullable<ImagePreviewProps["aspectRatio"]>, stri
   "3/4": "aspect-[3/4]",
 };
 
-const FALLBACK_SVG =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTIxIDE5VjVhMiAyIDAgMCAwLTItMkg1YTIgMiAwIDAgMC0yIDJ2MTRhMiAyIDAgMCAwIDIgMmgxNGEyIDIgMCAwIDAgMi0yem0tMTIuNS04LjVhMS41IDEuNSAwIDEgMSAzIDAgMS41IDEuNSAwIDAgMS0zIDB6TTIxIDE5bC01LTUtNCA0LTMtMy02IDZoMThWMTl6IiBmaWxsPSIjY2NjIi8+PC9zdmc+";
 
 export function ImagePreview({
   src,
@@ -29,6 +29,13 @@ export function ImagePreview({
   className,
   ...props
 }: Readonly<ImagePreviewProps>) {
+  const [hasError, setHasError] = useState(false);
+  const [prevSrc, setPrevSrc] = useState(src);
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    setHasError(false);
+  }
+
   return (
     <div
       className={cn(
@@ -38,15 +45,22 @@ export function ImagePreview({
       )}
       {...props}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        className="h-full w-full object-cover"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = FALLBACK_SVG;
-        }}
-      />
+      {hasError ? (
+        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+            <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+          </svg>
+        </div>
+      ) : (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          unoptimized
+          className="object-cover"
+          onError={() => setHasError(true)}
+        />
+      )}
 
       {onRemove && (
         <button

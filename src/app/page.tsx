@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { listArtworks } from "@/api";
 import type { ArtworkResponse } from "@/api";
 import { PublicNav } from "@/components/common";
@@ -51,11 +52,11 @@ function FeaturedArtworkCard({ artwork }: Readonly<{ artwork: ArtworkResponse }>
     <div className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image.url}
             alt={artwork.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         )}
       </div>
@@ -101,11 +102,11 @@ function ArtistCard({ artist }: Readonly<{ artist: typeof FEATURED_ARTISTS[0] }>
   return (
     <Link href={`/artist/${artist.id}`} className="group block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative h-32 overflow-hidden bg-muted">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={artist.coverUrl}
           alt=""
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground ring-2 ring-background">
@@ -225,7 +226,7 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-foreground">Featured Artists</h2>
               <p className="mt-1 text-sm text-muted-foreground">Connect with talented creators</p>
             </div>
-            <Link href="/discover" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+            <Link href="/discover?tab=artists" className="flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               View All
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />

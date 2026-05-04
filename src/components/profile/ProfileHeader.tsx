@@ -1,4 +1,4 @@
-import React from "react";
+import Image from "next/image";
 
 interface ProfileHeaderProps {
   name: string;
@@ -14,14 +14,15 @@ function getInitials(name: string) {
     .join("");
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, avatarUrl, role, status }) => (
+const ProfileHeader = ({ name, avatarUrl, role, status }: ProfileHeaderProps) => (
   <div className="flex items-center gap-4">
     {avatarUrl ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+        <Image
         src={avatarUrl}
         alt={name}
-        className="w-16 h-16 rounded-full object-cover border border-white"
+        width={64}
+        height={64}
+        className="rounded-full object-cover border border-white"
       />
     ) : (
       <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center text-2xl font-bold border border-white text-white">

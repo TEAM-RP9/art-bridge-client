@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, use, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { listArtworks, ApiError } from "@/api";
-import type { ArtworkResponse } from "@/api";
 import { PublicNav } from "@/components/common";
+import { get } from "@/api";
+import { MOCK_DISCOVER_ARTWORKS } from "@/app/discover/page";
+import type { PublicArtwork } from "@/app/discover/page";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -21,7 +26,7 @@ interface ArtistPageProps {
   readonly params: Promise<{ id: string }>;
 }
 
-// ── Mock artist profiles (replace with GET /artists/:id when backend ready) ───
+// ── Mock data (used when NEXT_PUBLIC_USE_MOCK=true) ───────────────────────────
 
 const MOCK_ARTISTS: Record<string, Omit<ArtistData, "id">> = {
   "1": {
@@ -30,24 +35,34 @@ const MOCK_ARTISTS: Record<string, Omit<ArtistData, "id">> = {
     location: "Tallinn, Estonia",
     website: "https://sofia.art",
   },
+  "2": {
+    name: "Emma Rodriguez",
+    bio: "Contemporary abstract artist exploring color theory and emotional landscapes.",
+    location: "Barcelona, Spain",
+  },
+  "3": {
+    name: "Marcus Chen",
+    bio: "Digital sculptor and 3D artist creating otherworldly forms inspired by organic structures.",
+    location: "Singapore",
+  },
+  "4": {
+    name: "Yuki Tanaka",
+    bio: "Printmaker and illustrator working at the intersection of tradition and the contemporary.",
+    location: "Kyoto, Japan",
+  },
 };
-
-function getMockArtist(id: string): ArtistData {
-  const known = MOCK_ARTISTS[id];
-  if (known) return { id, ...known };
-  return { id, name: `Artist ${id}`, bio: "Artist sharing their work on ArtBridge.", location: "Estonia" };
-}
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function ArtistAvatar({ artist }: Readonly<{ artist: ArtistData }>) {
   if (artist.avatarUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={artist.avatarUrl}
         alt={artist.name}
-        className="h-24 w-24 shrink-0 rounded-full object-cover ring-4 ring-background shadow-lg"
+        width={96}
+        height={96}
+        className="shrink-0 rounded-full object-cover ring-4 ring-background shadow-lg"
       />
     );
   }
@@ -58,7 +73,6 @@ function ArtistAvatar({ artist }: Readonly<{ artist: ArtistData }>) {
   );
 }
 
-
 function StatBlock({ value, label }: Readonly<{ value: string; label: string }>) {
   return (
     <div>
@@ -68,17 +82,20 @@ function StatBlock({ value, label }: Readonly<{ value: string; label: string }>)
   );
 }
 
-function PublicArtworkCard({ artwork }: Readonly<{ artwork: ArtworkResponse }>) {
+function PublicArtworkCard({ artwork }: Readonly<{ artwork: PublicArtwork }>) {
   const image = artwork.images.find((i) => i.isPrimary) ?? artwork.images[0];
   return (
-    <div className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <Link
+      href={`/discover/${artwork.id}`}
+      className="group block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
+    >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image.url}
             alt={artwork.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
@@ -113,7 +130,7 @@ function PublicArtworkCard({ artwork }: Readonly<{ artwork: ArtworkResponse }>) 
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -130,13 +147,34 @@ function EmptyArtworks({ category }: Readonly<{ category: string }>) {
   );
 }
 
-function ArtworkSkeleton() {
+function PageSkeleton() {
   return (
-    <div className="animate-pulse overflow-hidden rounded-xl border border-border bg-card">
-      <div className="aspect-[4/3] bg-muted" />
-      <div className="space-y-2 p-4">
-        <div className="h-4 w-3/4 rounded bg-muted" />
-        <div className="h-3 w-1/2 rounded bg-muted" />
+    <div className="min-h-screen bg-background">
+      <PublicNav />
+      <div className="border-b border-border bg-card">
+        <div className="mx-auto max-w-5xl px-4 py-10 animate-pulse">
+          <div className="flex gap-6">
+            <div className="h-24 w-24 shrink-0 rounded-full bg-muted" />
+            <div className="flex-1 space-y-3 pt-2">
+              <div className="h-7 w-48 rounded bg-muted" />
+              <div className="h-4 w-32 rounded bg-muted" />
+              <div className="h-4 w-80 rounded bg-muted" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse overflow-hidden rounded-xl border border-border bg-card">
+              <div className="aspect-[4/3] bg-muted" />
+              <div className="space-y-2 p-4">
+                <div className="h-4 w-3/4 rounded bg-muted" />
+                <div className="h-3 w-1/2 rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -146,32 +184,54 @@ function ArtworkSkeleton() {
 
 export default function ArtistPage({ params }: ArtistPageProps) {
   const { id } = use(params);
-  const [artworks, setArtworks] = useState<ArtworkResponse[]>([]);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [artist, setArtist] = useState<ArtistData | null>(null);
+  const [artworks, setArtworks] = useState<PublicArtwork[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [notFoundError, setNotFoundError] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("all");
-
-  const artist = getMockArtist(id);
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      try {
-        const result = await listArtworks({ status: "published", size: 50 });
-        if (!cancelled) setArtworks(result?.content ?? []);
-      } catch (err) {
-        if (!cancelled && err instanceof ApiError && err.status === 404) {
+
+    if (USE_MOCK) {
+      const raw = MOCK_ARTISTS[id];
+      Promise.resolve().then(() => {
+        if (cancelled) return;
+        if (!raw) {
           setNotFoundError(true);
+        } else {
+          setArtist({ id, ...raw });
+          setArtworks(MOCK_DISCOVER_ARTWORKS.filter((a) => a.artist.id === id));
         }
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
+        setIsLoading(false);
+      });
+      return () => { cancelled = true; };
     }
-    load();
+
+    // Real API: replace MOCK_ARTISTS/MOCK_DISCOVER_ARTWORKS with live endpoints
+    Promise.all([
+      get<ArtistData>(`/artists/${id}`),
+      get<PublicArtwork[]>(`/artists/${id}/artworks`),
+    ])
+      .then(([artistData, artworksData]) => {
+        if (!cancelled) {
+          setArtist(artistData);
+          setArtworks(artworksData ?? []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setNotFoundError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
     return () => { cancelled = true; };
   }, [id]);
 
   if (notFoundError) notFound();
+  if (isLoading) return <PageSkeleton />;
+  if (!artist) return null;
 
   const categories = [
     "all",
@@ -236,7 +296,7 @@ export default function ArtistPage({ params }: ArtistPageProps) {
       </div>
 
       {/* ── Category filter ──────────────────────────────────────────────────── */}
-      {!isLoading && categories.length > 1 && (
+      {categories.length > 1 && (
         <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="mx-auto max-w-5xl px-4">
             <div className="flex gap-2 overflow-x-auto py-3 [&::-webkit-scrollbar]:hidden">
@@ -261,15 +321,9 @@ export default function ArtistPage({ params }: ArtistPageProps) {
 
       {/* ── Artwork grid ─────────────────────────────────────────────────────── */}
       <div className="mx-auto max-w-5xl px-4 py-8">
-        {isLoading && (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }, (_, i) => <ArtworkSkeleton key={i} />)}
-          </div>
-        )}
-        {!isLoading && filtered.length === 0 && (
+        {filtered.length === 0 ? (
           <EmptyArtworks category={activeCategory} />
-        )}
-        {!isLoading && filtered.length > 0 && (
+        ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((artwork) => (
               <PublicArtworkCard key={artwork.id} artwork={artwork} />
