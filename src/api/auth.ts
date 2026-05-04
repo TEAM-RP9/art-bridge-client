@@ -8,28 +8,45 @@ function mockDelay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), 200));
 }
 
+export type UserRole = 'USER' | 'ARTIST' | 'ADMIN';
+export type RegisterableRole = 'USER' | 'ARTIST';
+
 export interface AuthResponse {
   userId: number;
   email: string;
-  role: string;
+  role: UserRole;
 }
 
 export interface UserResponse  {
   userId: number;
   email: string;
+  role: UserRole;
 }
 
 export const login = (email: string, password: string, opts?: RequestOptions) =>
   post<AuthResponse>('/auth/login', { email, password }, { ...opts, skipAuthRefresh: true });
 
-export const register = (email: string, password: string, opts?: RequestOptions) =>
-  post<UserResponse>('/auth/register', { email, password }, { ...opts, skipAuthRefresh: true });
+export const register = (
+  email: string,
+  password: string,
+  role: RegisterableRole,
+  opts?: RequestOptions,
+) =>
+  post<UserResponse>('/auth/register', { email, password, role }, { ...opts, skipAuthRefresh: true });
 
 export const logout = (opts?: RequestOptions) =>
   post<void>('/auth/refresh/revoke', undefined, { ...opts, skipAuthRefresh: true });
 
-export const googleLogin = (idToken: string, opts?: RequestOptions) =>
-  post<AuthResponse>('/auth/oauth/google', { idToken }, { ...opts, skipAuthRefresh: true });
+export const googleLogin = (
+  idToken: string,
+  role?: RegisterableRole,
+  opts?: RequestOptions,
+) =>
+  post<AuthResponse>(
+    '/auth/oauth/google',
+    role ? { idToken, role } : { idToken },
+    { ...opts, skipAuthRefresh: true },
+  );
 
 let refreshInFlight: Promise<boolean> | null = null;
 

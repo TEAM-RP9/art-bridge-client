@@ -1,6 +1,8 @@
 
 import React, { useState } from "react";
 import { Button, FormField, Input } from "@/components/ui";
+import type { RegisterableRole } from "@/api";
+import { cn } from "@/lib/utils";
 
 function getPasswordStrength(pw: string): string {
   if (!pw) return "";
@@ -15,14 +17,37 @@ function getPasswordStrength(pw: string): string {
 interface RegisterFormProps {
   isLoading?: boolean;
   error?: string;
-  fieldErrors?: { email?: string; password?: string; confirmPassword?: string };
-  onSubmit: (data: { email: string; password: string; confirmPassword: string }) => void;
+  fieldErrors?: { email?: string; password?: string; confirmPassword?: string; role?: string };
+  role: RegisterableRole | null;
+  onRoleChange: (role: RegisterableRole) => void;
+  onSubmit: (data: {
+    email: string;
+    password: string;
+    confirmPassword: string;
+    role: RegisterableRole;
+  }) => void;
 }
+
+const ROLE_OPTIONS: ReadonlyArray<{
+  value: RegisterableRole;
+  title: string;
+}> = [
+  {
+    value: "USER",
+    title: "I'm here to discover art",
+  },
+  {
+    value: "ARTIST",
+    title: "I'm an artist",
+  },
+];
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   isLoading = false,
   error,
   fieldErrors,
+  role,
+  onRoleChange,
   onSubmit,
 }) => {
   const [email, setEmail] = useState("");
@@ -32,6 +57,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     email?: string;
     password?: string;
     confirmPassword?: string;
+    role?: string;
   } | null>(null);
   const [passwordStrength, setPasswordStrength] = useState<string>("");
 
@@ -44,8 +70,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setValidationErrors(null);
-    const errors: { email?: string; password?: string; confirmPassword?: string } = {};
-    
+    const errors: {
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+      role?: string;
+    } = {};
+
+    if (!role) {
+      errors.role = "Please choose how you'd like to use Art Bridge.";
+    }
+
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
       errors.email = "Email is required.";
@@ -72,12 +107,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       setValidationErrors(errors);
       return;
     }
-    onSubmit({ email: trimmedEmail, password, confirmPassword });
+    onSubmit({ email: trimmedEmail, password, confirmPassword, role: role! });
   };
 
   const emailError = validationErrors?.email ?? fieldErrors?.email;
   const passwordError = validationErrors?.password ?? fieldErrors?.password;
   const confirmPasswordError = validationErrors?.confirmPassword ?? fieldErrors?.confirmPassword;
+  const roleError = validationErrors?.role ?? fieldErrors?.role;
 
   const strengthColor =
     passwordStrength === "Strong"
@@ -89,6 +125,47 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <fieldset disabled={isLoading} className="space-y-4">
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium">Account type</legend>
+          <div
+            role="radiogroup"
+            aria-label="Account type"
+            aria-required="true"
+            aria-invalid={roleError ? true : undefined}
+            className="grid gap-2 sm:grid-cols-2"
+          >
+            {ROLE_OPTIONS.map((option) => {
+              const selected = role === option.value;
+              return (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "flex cursor-pointer flex-col rounded-md border p-3 text-left transition-colors",
+                    selected
+                      ? "border-primary bg-primary/5 ring-2 ring-primary"
+                      : "border-border hover:bg-accent",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value={option.value}
+                    checked={selected}
+                    onChange={() => onRoleChange(option.value)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm font-medium">{option.title}</span>
+                </label>
+              );
+            })}
+          </div>
+          {roleError && (
+            <p className="text-xs text-destructive" aria-live="polite">
+              {roleError}
+            </p>
+          )}
+        </fieldset>
+
         <FormField label="Email" htmlFor="email" error={emailError} required>
           <Input
             id="email"
@@ -138,7 +215,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
         )}
 
-        <Button type="submit" className="w-full" isLoading={isLoading}>
+        <Button type="submit" className="w-full" isLoading={isLoading} disabled={!role}>
           Register
         </Button>
       </fieldset>

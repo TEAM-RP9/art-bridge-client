@@ -1,13 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
-import type { AuthResponse } from "@/api";
+import type { AuthResponse, UserRole } from "@/api";
 import { getCurrentUser } from "@/api";
 
 export interface AuthUser {
   userId: number;
   email: string;
-  role: string;
+  role: UserRole;
 }
 
 export interface AuthContextValue {

@@ -86,6 +86,11 @@ const NAV_SECONDARY = [
   },
 ];
 
+const ARTIST_ONLY_NAV_HREFS = new Set([
+  "/dashboard/portfolio",
+  "/dashboard/analytics",
+]);
+
 // ── Nav item component ────────────────────────────────────────────────────────
 
 function NavItem({
@@ -137,6 +142,8 @@ function NavItem({
 export function Sidebar() {
   const { user } = useAuth();
   const router = useRouter();
+  const isArtist = user?.role === "ARTIST";
+  const primaryNav = NAV_PRIMARY.filter((item) => isArtist || !ARTIST_ONLY_NAV_HREFS.has(item.href));
 
   const handleLogout = async () => {
     try { await logout(); } catch { /* ignore */ }
@@ -163,22 +170,24 @@ export function Sidebar() {
       </div>
 
       {/* Add artwork CTA */}
-      <div className="p-3">
-        <Link
-          href="/dashboard/artworks/new"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Artwork
-        </Link>
-      </div>
+      {isArtist && (
+        <div className="p-3">
+          <Link
+            href="/dashboard/artworks/new"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Artwork
+          </Link>
+        </div>
+      )}
 
       {/* Primary nav */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-2">
-        {NAV_PRIMARY.map((item) => (
+        {primaryNav.map((item) => (
           <NavItem key={item.href} {...item} />
         ))}
 
@@ -221,19 +230,21 @@ export function Sidebar() {
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const isArtist = user?.role === "ARTIST";
 
   const items = [
     { href: "/dashboard/artworks", label: "Artworks", icon: NAV_PRIMARY[0].icon },
-    { href: "/dashboard/portfolio", label: "Portfolio", icon: NAV_PRIMARY[1].icon },
+    { href: "/dashboard/portfolio", label: "Portfolio", icon: NAV_PRIMARY[1].icon, artistOnly: true },
     { href: "/dashboard/artworks/new", label: "Add", icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
         viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
       </svg>
-    )},
-    { href: "/dashboard/analytics", label: "Analytics", icon: NAV_PRIMARY[2].icon },
+    ), artistOnly: true },
+    { href: "/dashboard/analytics", label: "Analytics", icon: NAV_PRIMARY[2].icon, artistOnly: true },
     { href: "/dashboard/settings", label: "Settings", icon: NAV_SECONDARY[1].icon },
-  ];
+  ].filter((item) => isArtist || !item.artistOnly);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center border-t border-border bg-card lg:hidden">
