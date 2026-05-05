@@ -17,7 +17,7 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const auth = useAuth();
-  const next = useMemo(() => sanitizeNext(searchParams?.get("next") ?? null), [searchParams]);
+  const rawNext = useMemo(() => searchParams?.get("next") ?? null, [searchParams]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [googlePending, setGooglePending] = useState(false);
@@ -96,7 +96,8 @@ function RegisterContent() {
 
   const completeLogin = (response: AuthResponse) => {
     auth.signIn(response);
-    router.replace(next);
+    const fallback = response.role === "ARTIST" ? "/dashboard" : "/discover";
+    router.replace(sanitizeNext(rawNext, fallback));
   };
 
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
