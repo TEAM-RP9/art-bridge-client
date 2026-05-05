@@ -106,14 +106,85 @@ const DIMENSION_UNIT_FROM_API: Record<string, DimensionUnit> = {
   M: "m",
 };
 
-// API sends UPPER_SNAKE_CASE enums at runtime; types don't reflect that, hence the casts.
-function fromApiArtwork(raw: ArtworkResponse): ArtworkResponse {
-  const rawUnit = raw.dimensionUnit as unknown as string | null;
+interface WireArtwork {
+  id: number | string;
+  title: string;
+  description: string;
+  category: string | null;
+  medium: string | null;
+  style?: string | null;
+  width: number | null;
+  height: number | null;
+  dimensionUnit: string | null;
+  creationYear: number | null;
+  tags: string[] | null;
+  status: string;
+  showOnProfile: boolean;
+  imageUrl?: string | null;
+  mediaId?: number | string | null;
+  viewsCount?: number;
+  likesCount?: number;
+  viewCount?: number;
+  likeCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface WireArtworkListResponse {
+  items?: WireArtwork[];
+  content?: WireArtwork[];
+  totalCount?: number;
+  totalElements?: number;
+  totalPages: number;
+  currentPage?: number;
+  page?: number;
+  pageSize?: number;
+  size?: number;
+}
+
+function safeImageUrl(url: string): string {
+  if (typeof window === "undefined") return url;
+  if (window.location.protocol !== "https:") return url;
+  if (!url.startsWith("http://")) return url;
+  try {
+    const u = new URL(url);
+    return `/api${u.pathname}${u.search}`;
+  } catch {
+    return url;
+  }
+}
+
+function fromApiArtwork(raw: WireArtwork): ArtworkResponse {
+  const rawUnit = raw.dimensionUnit;
+  const images: ArtworkImage[] = raw.imageUrl
+    ? [
+        {
+          id: String(raw.mediaId ?? raw.id),
+          url: safeImageUrl(raw.imageUrl),
+          width: raw.width ?? 0,
+          height: raw.height ?? 0,
+          isPrimary: true,
+        },
+      ]
+    : [];
   return {
-    ...raw,
-    status: STATUS_FROM_API[raw.status as unknown as string] ?? raw.status,
+    id: String(raw.id),
+    title: raw.title,
+    description: raw.description,
     category: raw.category ? (CATEGORY_FROM_API[raw.category] ?? raw.category) : "",
+    medium: raw.medium ?? "",
+    width: raw.width,
+    height: raw.height,
     dimensionUnit: rawUnit ? (DIMENSION_UNIT_FROM_API[rawUnit] ?? null) : null,
+    creationYear: raw.creationYear,
+    tags: raw.tags ?? [],
+    status: STATUS_FROM_API[raw.status] ?? (raw.status as ArtworkStatus),
+    showOnProfile: raw.showOnProfile,
+    images,
+    viewCount: raw.viewCount ?? raw.viewsCount ?? 0,
+    likeCount: raw.likeCount ?? raw.likesCount ?? 0,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
   };
 }
 
@@ -150,21 +221,27 @@ export const listArtworks = (
   if (qs) {
     url += "?" + qs;
   }
-  return get<ArtworkListResponse>(url, opts).then((res) => ({
-    ...res,
-    content: res.content.map(fromApiArtwork),
-  }));
+  return get<WireArtworkListResponse>(url, opts).then((res) => {
+    const wireItems = res.items ?? res.content ?? [];
+    return {
+      content: wireItems.map(fromApiArtwork),
+      totalElements: res.totalCount ?? res.totalElements ?? wireItems.length,
+      totalPages: res.totalPages ?? 1,
+      page: res.currentPage ?? res.page ?? 0,
+      size: res.pageSize ?? res.size ?? wireItems.length,
+    };
+  });
 };
 
 export const getArtwork = (id: string, opts?: RequestOptions): Promise<ArtworkResponse> => {
-  return get<ArtworkResponse>(`/artworks/${id}`, opts).then(fromApiArtwork);
+  return get<WireArtwork>(`/artworks/${id}`, opts).then(fromApiArtwork);
 };
 
 export const createArtwork = (
   data: CreateArtworkRequest,
   opts?: RequestOptions
 ): Promise<ArtworkResponse> => {
-  return post<ArtworkResponse>("/artworks", toApiPayload(data), opts).then(fromApiArtwork);
+  return post<WireArtwork>("/artworks", toApiPayload(data), opts).then(fromApiArtwork);
 };
 
 export const updateArtwork = (
@@ -172,7 +249,7 @@ export const updateArtwork = (
   data: UpdateArtworkRequest,
   opts?: RequestOptions
 ): Promise<ArtworkResponse> => {
-  return put<ArtworkResponse>(`/artworks/${id}`, toApiPayload(data), opts).then(fromApiArtwork);
+  return put<WireArtwork>(`/artworks/${id}`, toApiPayload(data), opts).then(fromApiArtwork);
 };
 
 export const deleteArtwork = (id: string, opts?: RequestOptions): Promise<void> => {
