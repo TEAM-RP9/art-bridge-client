@@ -2,6 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   images: {
+    unoptimized: process.env.NODE_ENV !== 'production',
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
       { protocol: 'http', hostname: '**' },
