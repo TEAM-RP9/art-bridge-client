@@ -15,6 +15,7 @@ import {
 import type { StepperStep } from "@/components/ui";
 import { createArtwork, uploadMedia, normalizeMediaUrl, ApiError } from "@/api";
 import type { CreateArtworkRequest } from "@/api";
+import { useAuth } from "@/auth";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -383,6 +384,8 @@ function Step3Publish({ imagePreviewUrl, formData, submitError, onFormChange }: 
 
 export default function NewArtworkPage() {
   const router = useRouter();
+  const { user, isInitializing } = useAuth();
+  const isArtist = user?.role === "ARTIST";
   const [currentStep, setCurrentStep] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -402,6 +405,12 @@ export default function NewArtworkPage() {
   const uploadAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); }, []);
+
+  useEffect(() => {
+    if (!isInitializing && !isArtist) {
+      router.replace("/dashboard/artworks");
+    }
+  }, [isArtist, isInitializing, router]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     setUploadError(null);
@@ -542,6 +551,10 @@ export default function NewArtworkPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isInitializing || !isArtist) {
+    return null;
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
