@@ -165,6 +165,70 @@ function mockDelay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), 400));
 }
 
+// ── Wire-format translation ──────────────────────────────────────────────────
+
+const CATEGORY_TO_API: Record<string, string> = {
+  painting: "PAINTING",
+  drawing: "DRAWING",
+  sculpture: "SCULPTURE",
+  photography: "PHOTOGRAPHY",
+  printmaking: "PRINT",
+  digital: "DIGITAL",
+  "mixed-media": "MIXED_MEDIA",
+  other: "OTHER",
+};
+
+const CATEGORY_FROM_API: Record<string, string> = Object.fromEntries(
+  Object.entries(CATEGORY_TO_API).map(([k, v]) => [v, k])
+);
+
+const STATUS_TO_API: Record<ArtworkStatus, string> = {
+  draft: "DRAFT",
+  published: "PUBLISHED",
+};
+
+const STATUS_FROM_API: Record<string, ArtworkStatus> = {
+  DRAFT: "draft",
+  PUBLISHED: "published",
+};
+
+const DIMENSION_UNIT_TO_API: Record<DimensionUnit, string> = {
+  cm: "CM",
+  in: "IN",
+  m: "M",
+};
+
+const DIMENSION_UNIT_FROM_API: Record<string, DimensionUnit> = {
+  CM: "cm",
+  IN: "in",
+  M: "m",
+};
+
+// API sends UPPER_SNAKE_CASE enums at runtime; types don't reflect that, hence the casts.
+function fromApiArtwork(raw: ArtworkResponse): ArtworkResponse {
+  const rawUnit = raw.unit as unknown as string | null;
+  return {
+    ...raw,
+    status: STATUS_FROM_API[raw.status as unknown as string] ?? raw.status,
+    category: raw.category ? (CATEGORY_FROM_API[raw.category] ?? raw.category) : "",
+    unit: rawUnit ? (DIMENSION_UNIT_FROM_API[rawUnit] ?? "cm") : "cm",
+  };
+}
+
+function toApiPayload<T extends UpdateArtworkRequest>(data: T): Record<string, unknown> {
+  const payload: Record<string, unknown> = { ...data };
+  if (data.status !== undefined) {
+    payload.status = STATUS_TO_API[data.status];
+  }
+  if (data.category) {
+    payload.category = CATEGORY_TO_API[data.category] ?? data.category;
+  }
+  if (data.unit !== undefined) {
+    payload.unit = DIMENSION_UNIT_TO_API[data.unit];
+  }
+  return payload;
+}
+
 // ── API functions ────────────────────────────────────────────────────────────
 
 export const listArtworks = (
@@ -193,15 +257,20 @@ export const listArtworks = (
   const params = new URLSearchParams();
   if (filters.page !== undefined) params.set("page", String(filters.page));
   if (filters.size !== undefined) params.set("size", String(filters.size));
-  if (filters.status) params.set("status", filters.status);
-  if (filters.category) params.set("category", filters.category);
+  if (filters.status) params.set("status", STATUS_TO_API[filters.status]);
+  if (filters.category) {
+    params.set("category", CATEGORY_TO_API[filters.category] ?? filters.category);
+  }
   if (filters.search) params.set("search", filters.search);
   const qs = params.toString();
   let url = "/artworks";
   if (qs) {
     url += "?" + qs;
   }
-  return get<ArtworkListResponse>(url, opts);
+  return get<ArtworkListResponse>(url, opts).then((res) => ({
+    ...res,
+    content: res.content.map(fromApiArtwork),
+  }));
 };
 
 export const getArtwork = (id: string, opts?: RequestOptions): Promise<ArtworkResponse> => {
@@ -210,7 +279,7 @@ export const getArtwork = (id: string, opts?: RequestOptions): Promise<ArtworkRe
     if (!artwork) return Promise.reject(new Error("Not found"));
     return mockDelay(artwork);
   }
-  return get<ArtworkResponse>(`/artworks/${id}`, opts);
+  return get<ArtworkResponse>(`/artworks/${id}`, opts).then(fromApiArtwork);
 };
 
 export const createArtwork = (
@@ -240,7 +309,7 @@ export const createArtwork = (
     mockStore = [newArtwork, ...mockStore];
     return mockDelay(newArtwork);
   }
-  return post<ArtworkResponse>("/artworks", data, opts);
+  return post<ArtworkResponse>("/artworks", toApiPayload(data), opts).then(fromApiArtwork);
 };
 
 export const updateArtwork = (
@@ -254,7 +323,7 @@ export const updateArtwork = (
     mockStore[idx] = { ...mockStore[idx], ...data, updatedAt: new Date().toISOString() };
     return mockDelay(mockStore[idx]);
   }
-  return put<ArtworkResponse>(`/artworks/${id}`, data, opts);
+  return put<ArtworkResponse>(`/artworks/${id}`, toApiPayload(data), opts).then(fromApiArtwork);
 };
 
 export const deleteArtwork = (id: string, opts?: RequestOptions): Promise<void> => {
@@ -274,5 +343,8 @@ export const listArtistArtworks = (
   if (filters.size !== undefined) params.set("size", String(filters.size));
   const qs = params.toString();
   const url = `/artists/${artistId}/artworks` + (qs ? "?" + qs : "");
-  return get<ArtworkListResponse>(url, opts);
+  return get<ArtworkListResponse>(url, opts).then((res) => ({
+    ...res,
+    content: res.content.map(fromApiArtwork),
+  }));
 };

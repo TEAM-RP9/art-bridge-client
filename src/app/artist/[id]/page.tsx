@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useEffect } from "react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { listArtistArtworks, ApiError } from "@/api";
 import type { ArtworkResponse } from "@/api";
@@ -43,11 +44,12 @@ function getMockArtist(id: string): ArtistData {
 function ArtistAvatar({ artist }: Readonly<{ artist: ArtistData }>) {
   if (artist.avatarUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={artist.avatarUrl}
         alt={artist.name}
-        className="h-24 w-24 shrink-0 rounded-full object-cover ring-4 ring-background shadow-lg"
+        width={96}
+        height={96}
+        className="shrink-0 rounded-full object-cover ring-4 ring-background shadow-lg"
       />
     );
   }
@@ -57,7 +59,6 @@ function ArtistAvatar({ artist }: Readonly<{ artist: ArtistData }>) {
     </div>
   );
 }
-
 
 function StatBlock({ value, label }: Readonly<{ value: string; label: string }>) {
   return (
@@ -74,11 +75,11 @@ function PublicArtworkCard({ artwork }: Readonly<{ artwork: ArtworkResponse }>) 
     <div className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={image.url}
             alt={artwork.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">

@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface UserProfileData {
   name: string;
   email: string;
@@ -15,7 +13,7 @@ interface UserProfileViewProps {
 const labelClass = "font-semibold text-white";
 const valueClass = "text-white/90";
 
-const UserProfileView: React.FC<UserProfileViewProps> = ({ data }) => (
+const UserProfileView = ({ data }: UserProfileViewProps) => (
   <div className="space-y-2">
     <div>
       <span className={labelClass}>Name:</span> <span className={valueClass}>{data.name}</span>

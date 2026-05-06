@@ -90,9 +90,9 @@ const NAV_SECONDARY = [
 
 function NavItem({
   href, label, icon, soon = false, collapsed = false,
-}: {
+}: Readonly<{
   href: string; label: string; icon: React.ReactNode; soon?: boolean; collapsed?: boolean;
-}) {
+}>) {
   const pathname = usePathname();
   const isActive = pathname === href || (pathname?.startsWith(href + "/") ?? false);
 
@@ -246,11 +246,7 @@ export function MobileNav() {
             href={item.href}
             className={cn(
               "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
-              isAdd
-                ? "text-primary"
-                : isActive
-                ? "text-primary"
-                : "text-muted-foreground"
+              isAdd || isActive ? "text-primary" : "text-muted-foreground"
             )}
           >
             <span className={cn(isAdd && "flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground")}>
