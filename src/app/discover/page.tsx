@@ -59,7 +59,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Chromatic Dreams",
     description: "An exploration of vibrant color interactions and emotional resonance through layered acrylic techniques.",
     category: "painting", medium: "Acrylic on canvas",
-    width: 120, height: 90, dimensionUnit: "cm", creationYear: 2024,
+    width: 120, height: 90, unit: "cm", year: 2024,
     tags: ["abstract", "colorful", "modern", "large"],
     status: "published", showOnProfile: true,
     images: [{ id: "di1", url: "https://images.unsplash.com/photo-1549887534-1541e9326642?w=800&q=80", width: 800, height: 600, isPrimary: true }],
@@ -72,7 +72,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Ethereal Form",
     description: "A sculptural study of the human figure, captured at the boundary between movement and stillness.",
     category: "sculpture", medium: "Bronze",
-    width: 40, height: 80, dimensionUnit: "cm", creationYear: 2024,
+    width: 40, height: 80, unit: "cm", year: 2024,
     tags: ["figurative", "bronze", "contemporary"],
     status: "published", showOnProfile: true,
     images: [{ id: "di2", url: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&q=80", width: 800, height: 1067, isPrimary: true }],
@@ -85,7 +85,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Void and Light",
     description: "A long-exposure photograph of a storm system photographed from above the clouds.",
     category: "photography", medium: "Digital photography",
-    width: null, height: null, dimensionUnit: "cm", creationYear: 2024,
+    width: null, height: null, unit: "cm", year: 2024,
     tags: ["aerial", "nature", "abstract", "monochrome"],
     status: "published", showOnProfile: true,
     images: [{ id: "di3", url: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=800&q=80", width: 800, height: 533, isPrimary: true }],
@@ -98,7 +98,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Misty Mountains",
     description: "Plein-air oil painting captured during early morning in the Estonian highlands. Part of the 'Northern Light' series.",
     category: "painting", medium: "Oil on canvas",
-    width: 80, height: 60, dimensionUnit: "cm", creationYear: 2024,
+    width: 80, height: 60, unit: "cm", year: 2024,
     tags: ["landscape", "plein-air", "nature", "nordic"],
     status: "published", showOnProfile: true,
     images: [{ id: "di4", url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80", width: 800, height: 800, isPrimary: true }],
@@ -111,7 +111,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Geometry in Stone",
     description: "Urban documentary series exploring architectural repetition and shadow play in modernist buildings.",
     category: "photography", medium: "Film photography",
-    width: null, height: null, dimensionUnit: "cm", creationYear: 2024,
+    width: null, height: null, unit: "cm", year: 2024,
     tags: ["architecture", "urban", "monochrome", "geometry"],
     status: "published", showOnProfile: true,
     images: [{ id: "di5", url: "https://images.unsplash.com/photo-1549887534-1541e9326642?w=800&q=80&sat=-100", width: 800, height: 600, isPrimary: true }],
@@ -124,7 +124,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "The Wanderer",
     description: "A meditation on solitude and luminescence. Digital composition built from over 200 hand-drawn layers.",
     category: "digital", medium: "Digital illustration",
-    width: null, height: null, dimensionUnit: "cm", creationYear: 2023,
+    width: null, height: null, unit: "cm", year: 2023,
     tags: ["atmospheric", "solitude", "light"],
     status: "published", showOnProfile: true,
     images: [{ id: "di6", url: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&q=80&hue=180", width: 800, height: 1067, isPrimary: true }],
@@ -137,7 +137,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Night Traces",
     description: "Charcoal study exploring gesture and movement. From a series drawn in a single overnight session.",
     category: "drawing", medium: "Charcoal on paper",
-    width: 50, height: 70, dimensionUnit: "cm", creationYear: 2025,
+    width: 50, height: 70, unit: "cm", year: 2025,
     tags: ["gesture", "figure", "charcoal", "study"],
     status: "published", showOnProfile: true,
     images: [{ id: "di7", url: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=800&q=80&sat=-80", width: 800, height: 533, isPrimary: true }],
@@ -150,7 +150,7 @@ export const MOCK_DISCOVER_ARTWORKS: PublicArtwork[] = [
     title: "Echoes",
     description: "Linocut print from the 'Memory' series. Hand-inked on Japanese kozo paper, edition of 15.",
     category: "printmaking", medium: "Linocut",
-    width: 30, height: 40, dimensionUnit: "cm", creationYear: 2023,
+    width: 30, height: 40, unit: "cm", year: 2023,
     tags: ["linocut", "edition", "memory", "handmade"],
     status: "published", showOnProfile: true,
     images: [{ id: "di8", url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&sat=-60", width: 800, height: 800, isPrimary: true }],
@@ -225,13 +225,13 @@ function ArtworkCard({ artwork }: Readonly<{ artwork: PublicArtwork }>) {
         <p className="mt-0.5 text-xs text-primary">{artwork.artist.name}</p>
         {artwork.medium && (
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {artwork.medium}{artwork.creationYear ? `, ${artwork.creationYear}` : ""}
+            {artwork.medium}{artwork.year ? `, ${artwork.year}` : ""}
           </p>
         )}
         <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><EyeIcon />{artwork.viewCount.toLocaleString()}</span>
           <span className="flex items-center gap-1"><HeartIcon />{artwork.likeCount.toLocaleString()}</span>
-          {artwork.creationYear && <span className="ml-auto">{artwork.creationYear}</span>}
+          {artwork.year && <span className="ml-auto">{artwork.year}</span>}
         </div>
       </div>
     </Link>
@@ -292,9 +292,9 @@ function DiscoverContent() {
     if (category !== "all") items = items.filter((a) => a.category === category);
     if (year !== "all") {
       if (year === "older") {
-        items = items.filter((a) => a.creationYear !== null && a.creationYear < 2021);
+        items = items.filter((a) => a.year !== null && a.year < 2021);
       } else {
-        items = items.filter((a) => a.creationYear === Number.parseInt(year, 10));
+        items = items.filter((a) => a.year === Number.parseInt(year, 10));
       }
     }
 

@@ -95,11 +95,11 @@ const ARTIST_ONLY_NAV_HREFS = new Set([
 
 function NavItem({
   href, label, icon, soon = false, collapsed = false,
-}: {
+}: Readonly<{
   href: string; label: string; icon: React.ReactNode; soon?: boolean; collapsed?: boolean;
-}) {
+}>) {
   const pathname = usePathname();
-  const isActive = pathname === href || pathname?.startsWith(href + "/");
+  const isActive = pathname === href || (pathname?.startsWith(href + "/") ?? false);
 
   if (soon) {
     return (
@@ -250,18 +250,14 @@ export function MobileNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center border-t border-border bg-card lg:hidden">
       {items.map((item) => {
         const isAdd = item.label === "Add";
-        const isActive = !isAdd && (pathname === item.href || pathname?.startsWith(item.href + "/"));
+        const isActive = !isAdd && (pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false));
         return (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
               "flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
-              isAdd
-                ? "text-primary"
-                : isActive
-                ? "text-primary"
-                : "text-muted-foreground"
+              isAdd || isActive ? "text-primary" : "text-muted-foreground"
             )}
           >
             <span className={cn(isAdd && "flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground")}>

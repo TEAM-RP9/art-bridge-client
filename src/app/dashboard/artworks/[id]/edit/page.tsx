@@ -51,8 +51,8 @@ export default function EditArtworkPage({ params }: Readonly<EditPageProps>) {
         setMedium(data.medium ?? "");
         setWidthStr(data.width != null ? String(data.width) : "");
         setHeightStr(data.height != null ? String(data.height) : "");
-        setUnit(data.dimensionUnit ?? "cm");
-        setYearStr(data.creationYear != null ? String(data.creationYear) : "");
+        setUnit(data.unit ?? "cm");
+        setYearStr(data.year != null ? String(data.year) : "");
         setTags(data.tags ?? []);
         setStatus(data.status);
         setShowOnProfile(data.showOnProfile);
@@ -87,8 +87,8 @@ export default function EditArtworkPage({ params }: Readonly<EditPageProps>) {
       medium: medium.trim() || undefined,
       width: widthStr ? Number(widthStr) : undefined,
       height: heightStr ? Number(heightStr) : undefined,
-      dimensionUnit: (widthStr || heightStr) ? unit : undefined,
-      creationYear: yearStr ? Number(yearStr) : undefined,
+      unit: (widthStr || heightStr) ? unit : undefined,
+      year: yearStr ? Number(yearStr) : undefined,
       tags,
       status,
       showOnProfile,
