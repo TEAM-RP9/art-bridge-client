@@ -129,7 +129,7 @@ export default function ArtworkDetailPage({ params }: Readonly<ArtworkDetailPage
             {artwork.medium && (
               <p className="mt-1 text-sm text-muted-foreground">
                 {artwork.medium}
-                {artwork.creationYear ? `, ${artwork.creationYear}` : ""}
+                {artwork.year ? `, ${artwork.year}` : ""}
               </p>
             )}
           </div>
@@ -146,7 +146,7 @@ export default function ArtworkDetailPage({ params }: Readonly<ArtworkDetailPage
                 Dimensions
               </p>
               <p className="text-sm">
-                {artwork.width} × {artwork.height} {artwork.dimensionUnit}
+                {artwork.width} × {artwork.height} {artwork.unit}
               </p>
             </div>
           )}
