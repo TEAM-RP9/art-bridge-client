@@ -6,7 +6,7 @@ setAuthInterceptor({ refresh: refreshSession, onFailure: redirectToLogin });
 export { ApiError, del, get, patch, post, put } from './api';
 export type { ApiFieldError, ProblemDetail, RequestOptions } from './api';
 export { getCurrentUser, googleLogin, login, logout, redirectToLogin, register } from './auth';
-export type { AuthResponse, UserResponse } from './auth';
+export type { AuthResponse, RegisterableRole, UserResponse, UserRole } from './auth';
 
 export {
   createArtwork,

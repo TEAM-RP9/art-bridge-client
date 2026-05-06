@@ -18,7 +18,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const auth = useAuth();
 
-  const next = useMemo(() => sanitizeNext(searchParams?.get("next") ?? null), [searchParams]);
+  const rawNext = useMemo(() => searchParams?.get("next") ?? null, [searchParams]);
   const isRegistered = useMemo(() => searchParams?.get("registered") === "true", [searchParams]);
   const initialEmail = useMemo(() => searchParams?.get("email") ?? "", [searchParams]);
 
@@ -35,7 +35,8 @@ function LoginContent() {
 
   const completeLogin = (response: AuthResponse) => {
     auth.signIn(response);
-    router.replace(next);
+    const fallback = response.role === "ARTIST" ? "/dashboard" : "/discover";
+    router.replace(sanitizeNext(rawNext, fallback));
   };
 
   const handleEmailPassword = async (data: { email: string; password: string }) => {
