@@ -416,14 +416,14 @@ export const deleteArtwork = (id: string, opts?: RequestOptions): Promise<void> 
 };
 
 export const listArtistArtworks = (
-  artistId: string,
+  _artistId: string,
   filters: PublicArtworkFilters = {},
   opts?: RequestOptions
 ): Promise<ArtworkListResponse> => {
   const params = new URLSearchParams();
   if (filters.size !== undefined) params.set("size", String(filters.size));
   const qs = params.toString();
-  const url = `/artists/${artistId}/artworks` + (qs ? "?" + qs : "");
+  const url = `/artworks/my` + (qs ? "?" + qs : "");
   return get<WireArtworkListResponse>(url, opts).then((res) => {
     const wireItems = res.items ?? res.content ?? [];
     return {
